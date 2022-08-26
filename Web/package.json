@@ -1,7 +1,7 @@
 {
   "name": "self-hosted-expo-update-server-web",
   "description": "Self Hosted Expo Update Server Management Web Dashboard",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "private": true,
   "main": "src",
   "author": {
