@@ -1,0 +1,9 @@
+{
+  "authentication": {
+    "secret": "FEATHERS_AUTH_SECRET"
+  },
+  "mongodb": "MONGO_CONN",
+  "adminPass": "ADMIN_PASSWORD",
+  "publicURL": "PUBLIC_URL",
+  "uploadKey": "UPLOAD_KEY"
+}

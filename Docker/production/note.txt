@@ -1,0 +1,5 @@
+This is an example production deployment using docker-compose
+
+It is best to run it behind a reverse proxy to provide https encryption to the two endpoints
+
+Inspect all the files and set your secrets accordingly

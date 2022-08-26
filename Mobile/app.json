@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "customupdates",
+    "slug": "customupdates",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "runtimeVersion": "1.1.1",
+    "updates": {
+      "url": "http://10.0.0.30:3000/api/manifest",
+      "enabled": true,
+      "checkAutomatically": "ON_ERROR_RECOVERY",
+      "fallbackToCacheTimeout": 0,
+      "codeSigningCertificate": "./code-signing/certificate.pem",
+      "codeSigningMetadata": {
+        "keyid": "main",
+        "alg": "rsa-v1_5-sha256"
+      },
+      "requestHeaders": {
+        "expo-channel-name":"staging",
+        "expo-project": "customupdates"
+      }
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.test.updater"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.test.updater"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

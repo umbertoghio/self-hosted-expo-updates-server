@@ -1,0 +1,65 @@
+version: '3.7'
+services:
+  api:
+    build:
+      context: ../../API
+      dockerfile: ./Dockerfile.dev
+    container_name: 'updater-api-dev'
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - ../../API:/server
+      - ./updates:/updates
+      - ./uploads:/uploads
+      - yarn_cache_updater_api:/yarn
+      - node_modules_updater_api:/server/node_modules
+    ports:
+      - 3000:3000
+      - 9229:9229
+    environment:
+      - TZ=Europe/Rome
+      - FEATHERS_AUTH_SECRET=EnterHereYourCustomSecret
+      - MONGO_CONN=mongodb://db:27017/updater
+      - ADMIN_PASSWORD=devserver
+      - UPLOAD_KEY=abc123def456
+      - NODE_ENV=development
+      - PUBLIC_URL=http://10.0.0.30:3000
+    command: npx nodemon --inspect=0.0.0.0 src/index.js
+
+  web:
+    build:
+      context: ../../Web
+      dockerfile: Dockerfile.dev
+    container_name: updater-web-dev
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - ../../Web:/app
+      - yarn_cache_updater_web:/yarn
+      - node_modules_updater_web:/app/node_modules
+    ports:
+      - 4000:4000
+    environment:
+      - API_BASE_URL=http://localhost:3000/
+      - ENVIRONMENT=development
+
+  db:
+    container_name: updater-db-dev
+    image: mongo:4.2.2
+    platform: linux/amd64
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - updater_db_data:/data/db
+    command: mongod --bind_ip=0.0.0.0 --logpath=/dev/null
+
+
+volumes:
+  yarn_cache_updater_api:
+  yarn_cache_updater_web:
+  node_modules_updater_api:
+  node_modules_updater_web:
+  updater_db_data:

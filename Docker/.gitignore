@@ -1,0 +1,4 @@
+/development/updates/*
+!/development/updates/.gitkeep
+/development/uploads/*
+!/development/uploads/.gitkeep

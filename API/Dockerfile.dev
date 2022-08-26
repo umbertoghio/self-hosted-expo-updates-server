@@ -1,0 +1,13 @@
+FROM node:16-alpine
+RUN apk update && apk add --no-cache tzdata
+
+# Yarn Cache
+ENV YARN_CACHE_FOLDER /yarn
+RUN mkdir -p $YARN_CACHE_FOLDER && chown -R node:node $YARN_CACHE_FOLDER
+
+# Docker Entry Point
+COPY docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+RUN mkdir -p /logs

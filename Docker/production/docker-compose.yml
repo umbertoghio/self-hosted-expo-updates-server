@@ -1,0 +1,51 @@
+version: '3.7'
+services:
+  self_hosted_expo_updates_server_api:
+    image: ghcr.io/umbertoghio/self-hosted-expo-updates-server-api:latest
+    container_name: self_hosted_expo_updates_server_api
+    restart: always
+    depends_on:
+      - self_hosted_expo_updates_server_db
+    volumes:
+      - ./updates:/updates
+      - ./uploads:/uploads
+    ports:
+      - 3000:3000
+    environment:
+      - TZ=Europe/Rome
+      - FEATHERS_AUTH_SECRET=EnterHereYourCustomSecret
+      - MONGO_CONN=mongodb://expo@myRegularUserPassw:self_hosted_expo_updates_server_db:27017/expo
+      - ADMIN_PASSWORD=devserver
+      - UPLOAD_KEY=abc123def456
+      - NODE_ENV=production
+      - PUBLIC_URL=https://api.myserverpublic
+  self_hosted_expo_updates_server_web:
+    image: ghcr.io/umbertoghio/self-hosted-expo-updates-server-web:latest
+    container_name: self_hosted_expo_updates_server_web
+    restart: always
+    depends_on:
+      - self_hosted_expo_updates_server_api
+    ports:
+      - 8080:80
+    environment:
+      - API_BASE_URL=https://api.myserverpublic
+
+  self_hosted_expo_updates_server_db:
+    container_name: self_hosted_expo_updates_server_db
+    image: mongo:4.2.2
+    platform: linux/amd64
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - self_hosted_mongo_data:/data/db
+      - ./mongoinit:/docker-entrypoint-initdb.d/
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=myPRODUCTIONPassword
+      - MONGO_INITDB_DATABASE=expo
+    command: mongod --bind_ip=0.0.0.0 --logpath=/dev/null
+
+
+volumes:
+ self_hosted_mongo_data:

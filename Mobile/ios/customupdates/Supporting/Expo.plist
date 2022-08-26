@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>EXUpdatesCheckOnLaunch</key>
+    <string>NEVER</string>
+    <key>EXUpdatesCodeSigningCertificate</key>
+    <string>-----BEGIN CERTIFICATE-----&#xD;
+MIICzTCCAbWgAwIBAgIJTz3WTUAArwZKMA0GCSqGSIb3DQEBCwUAMA8xDTALBgNV&#xD;
+BAMTBHRlc3QwIBcNMjIwODI1MTYxMjI5WhgPMjEyMjA4MjUxNjEyMjlaMA8xDTAL&#xD;
+BgNVBAMTBHRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDNMlxv&#xD;
+zweOvBKjSLJ45nwJzhS9GCAO+jr2ioBtz6ZYx0tFEY+3WtZDyEb9rvg0U4NdHSoD&#xD;
+kc4K6MD/TbACwf2oKCuHPoHJWLWsMLqLIQ/FGL+GdczfT6RWfnK6vwfwNzHbPIsC&#xD;
+Y8cbo4OErwVvJIlntbBkSpcTnVC6xwzhMwsYbLUGtD8K1UUEv5AX9mZiphJ66fWh&#xD;
+ko009COF9PTmvUvc5Ko3Mi+1pjLT5wP4kIHUqJ4N8trXGy3424MAwjvsqFJAk3m8&#xD;
+lfX3pnaVFzqPZOuzJwBbZwNVtpA387JiE5X6USSgOs4Yika1JpMZQxJ076KVMbt0&#xD;
+zUC4s+kUxft1VUvxAgMBAAGjKjAoMA4GA1UdDwEB/wQEAwIHgDAWBgNVHSUBAf8E&#xD;
+DDAKBggrBgEFBQcDAzANBgkqhkiG9w0BAQsFAAOCAQEAiLeCxA9/WDX8KFB8cZT0&#xD;
+bShx3Ekakb85g7FYeb4yv4gxijC33hzeO36IB/RBq4Iw3Sgsl4goO6VWm2zAYs4q&#xD;
+87MV/w12kDI68jBfc3X2pUeiNqsDT5Y4eIPcMAqeGdK71i/PnKJmwkaM6fX8kLZe&#xD;
+cTobioXMnwaEO5sZsf6KrBPoqwy5vuUBQMUQV8YJofKOe84xV30JJvcmVd1N6n8R&#xD;
+UFSvGUVU6bhxrWQwwic2mt40WQCXUR96Tp+lVEGdlCkgPfHJc31pUVq9MfTTvPYi&#xD;
+72Wbdnv4a+pSobqQ+DasH7irM4HrKIzLcjQwH7kkweSdIahPbF6/Ju6V/R7FjTHS&#xD;
+iQ==&#xD;
+-----END CERTIFICATE-----&#xD;
+</string>
+    <key>EXUpdatesCodeSigningMetadata</key>
+    <dict>
+      <key>keyid</key>
+      <string>main</string>
+      <key>alg</key>
+      <string>rsa-v1_5-sha256</string>
+    </dict>
+    <key>EXUpdatesEnabled</key>
+    <true/>
+    <key>EXUpdatesLaunchWaitMs</key>
+    <integer>0</integer>
+    <key>EXUpdatesRequestHeaders</key>
+    <dict>
+      <key>expo-channel-name</key>
+      <string>staging</string>
+      <key>expo-project</key>
+      <string>customupdates</string>
+    </dict>
+    <key>EXUpdatesRuntimeVersion</key>
+    <string>1.1.1</string>
+    <key>EXUpdatesURL</key>
+    <string>http://10.0.0.30:3000/api/manifest</string>
+  </dict>
+</plist>

@@ -1,0 +1,37 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.test.updater">
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+  <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.VIEW"/>
+      <category android:name="android.intent.category.BROWSABLE"/>
+      <data android:scheme="https"/>
+    </intent>
+  </queries>
+  <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme" android:usesCleartextTraffic="true">
+    <meta-data android:name="expo.modules.updates.CODE_SIGNING_CERTIFICATE" android:value="-----BEGIN CERTIFICATE-----&#xD;&#xA;MIICzTCCAbWgAwIBAgIJTz3WTUAArwZKMA0GCSqGSIb3DQEBCwUAMA8xDTALBgNV&#xD;&#xA;BAMTBHRlc3QwIBcNMjIwODI1MTYxMjI5WhgPMjEyMjA4MjUxNjEyMjlaMA8xDTAL&#xD;&#xA;BgNVBAMTBHRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDNMlxv&#xD;&#xA;zweOvBKjSLJ45nwJzhS9GCAO+jr2ioBtz6ZYx0tFEY+3WtZDyEb9rvg0U4NdHSoD&#xD;&#xA;kc4K6MD/TbACwf2oKCuHPoHJWLWsMLqLIQ/FGL+GdczfT6RWfnK6vwfwNzHbPIsC&#xD;&#xA;Y8cbo4OErwVvJIlntbBkSpcTnVC6xwzhMwsYbLUGtD8K1UUEv5AX9mZiphJ66fWh&#xD;&#xA;ko009COF9PTmvUvc5Ko3Mi+1pjLT5wP4kIHUqJ4N8trXGy3424MAwjvsqFJAk3m8&#xD;&#xA;lfX3pnaVFzqPZOuzJwBbZwNVtpA387JiE5X6USSgOs4Yika1JpMZQxJ076KVMbt0&#xD;&#xA;zUC4s+kUxft1VUvxAgMBAAGjKjAoMA4GA1UdDwEB/wQEAwIHgDAWBgNVHSUBAf8E&#xD;&#xA;DDAKBggrBgEFBQcDAzANBgkqhkiG9w0BAQsFAAOCAQEAiLeCxA9/WDX8KFB8cZT0&#xD;&#xA;bShx3Ekakb85g7FYeb4yv4gxijC33hzeO36IB/RBq4Iw3Sgsl4goO6VWm2zAYs4q&#xD;&#xA;87MV/w12kDI68jBfc3X2pUeiNqsDT5Y4eIPcMAqeGdK71i/PnKJmwkaM6fX8kLZe&#xD;&#xA;cTobioXMnwaEO5sZsf6KrBPoqwy5vuUBQMUQV8YJofKOe84xV30JJvcmVd1N6n8R&#xD;&#xA;UFSvGUVU6bhxrWQwwic2mt40WQCXUR96Tp+lVEGdlCkgPfHJc31pUVq9MfTTvPYi&#xD;&#xA;72Wbdnv4a+pSobqQ+DasH7irM4HrKIzLcjQwH7kkweSdIahPbF6/Ju6V/R7FjTHS&#xD;&#xA;iQ==&#xD;&#xA;-----END CERTIFICATE-----&#xD;&#xA;"/>
+    <meta-data android:name="expo.modules.updates.CODE_SIGNING_METADATA" android:value="{&quot;keyid&quot;:&quot;main&quot;,&quot;alg&quot;:&quot;rsa-v1_5-sha256&quot;}"/>
+    <meta-data android:name="expo.modules.updates.ENABLED" android:value="true"/>
+    <meta-data android:name="expo.modules.updates.EXPO_RUNTIME_VERSION" android:value="1.1.1"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="NEVER"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="http://10.0.0.30:3000/api/manifest"/>
+    <meta-data android:name="expo.modules.updates.UPDATES_CONFIGURATION_REQUEST_HEADERS_KEY" android:value="{&quot;expo-channel-name&quot;:&quot;staging&quot;,&quot;expo-project&quot;:&quot;customupdates&quot;}"/>
+    <activity android:name=".MainActivity" android:label="@string/app_name" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="portrait">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.test.updater"/>
+      </intent-filter>
+    </activity>
+    <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
+  </application>
+</manifest>

@@ -1,0 +1,50 @@
+{
+  "name": "self-hosted-expo-updates-server",
+  "version": "1.0.0",
+  "description": "Self Hosted Expo Updates Server with interactive Dashboard",
+  "repository": "https://github.com/umbertoghio/self-hosted-expo-updates-server.git",
+  "homepage": "https://github.com/umbertoghio/self-hosted-expo-updates-server",
+  "license": "MIT",
+  "scripts": {
+    "---Dev API & Web---": "",
+    "dev:run": "cd Docker/development; docker-compose up --build",
+    "dev:stop": "cd Docker/development; docker-compose down",
+    "---Publish Update---": "",
+    "expo-publish": "./expo-publish-selfhosted.sh 1.1.1 staging ./Mobile abc123def456 http://localhost:3000",
+    "---Mobile---": "",
+    "mobile:start:packager": "cd Mobile; yarn expo start --dev-client",
+    "android:build:devClient": "cd Mobile; yarn expo run:android",
+    "android:build:staging": "rm -f Builds/android.apk;cd Mobile; eas build --profile=customupdates-staging -p android --output=../Builds/android.apk --local",
+    "ios:build:staging": "rm -f Builds/android.ipa;cd Mobile; eas build --profile=customupdates-staging -p ios --output=../Builds/android.apk --local",
+    "android:install": "adb install Builds/android.apk",
+    "expo-patch": "rm -rf Mobile/node_modules/@expo/config-plugins/build && cp -r expoPatch/build Mobile/node_modules/@expo/config-plugins",
+    "expo:prebuild": "cd Mobile; yarn expo prebuild"
+  },
+  "devDependencies": {
+    "@babel/core": "~7.9.0",
+    "babel-eslint": "^10.1.0",
+    "babel-preset-expo": "^8.5.1",
+    "eslint": "^7.11.0",
+    "eslint-plugin-html": "^6.2.0",
+    "nodemon": "^2.0.14",
+    "standard": "^16.0.4",
+    "typescript": "^4.4.4"
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "version": "15.0",
+    "globals": [
+      "describe",
+      "test",
+      "jest",
+      "expect",
+      "fetch",
+      "navigator",
+      "__DEV__",
+      "__static",
+      "XMLHttpRequest",
+      "FormData",
+      "React$Element"
+    ]
+  }
+}

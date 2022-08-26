@@ -1,0 +1,18 @@
+FROM node:16-alpine
+
+# Add bash
+RUN apk add --no-cache bash
+
+# Yarn Cache
+ENV YARN_CACHE_FOLDER /yarn
+RUN mkdir -p $YARN_CACHE_FOLDER
+
+# Docker Entry Point
+COPY ./deploy/startup-dev.sh /
+RUN chmod +x /startup-dev.sh
+
+# Env Loader
+COPY ./deploy/loadEnv.sh /
+RUN chmod +x /loadEnv.sh
+
+ENTRYPOINT ["/startup-dev.sh"]

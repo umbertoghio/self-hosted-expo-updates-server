@@ -1,0 +1,32 @@
+{
+  "host": "localhost",
+  "port": 3000,
+  "public": "../public/",
+  "paginate": false,
+  "authentication": {
+    "entity": "user",
+    "service": "users",
+    "secret": "defaultJwtSecret",
+    "authStrategies": [
+      "jwt",
+      "local"
+    ],
+    "jwtOptions": {
+      "header": {
+        "typ": "access"
+      },
+      "audience": "https://myselfhosting.com",
+      "issuer": "feathers",
+      "algorithm": "HS256",
+      "expiresIn": "5y"
+    },
+    "local": {
+      "usernameField": "\\username",
+      "passwordField": "password"
+    }
+  },
+  "mongodb": "mongodb://db:27017/updater",
+  "adminPass": "admin",
+  "publicURL": "http://localhost:3000",
+  "uploadKey": "UPLOAD_KEY"
+}

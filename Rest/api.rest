@@ -1,0 +1,49 @@
+#Name: REST Client Sample API calls https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+###
+
+### API Healthcheck call
+GET http://localhost:3000/status HTTP/1.1
+
+
+### Admin Login
+POST http://localhost:3000/authentication HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "devserver",
+  "strategy": "local"
+}
+
+
+### Example of authenticated request
+GET http://localhost:3000/apps HTTP/1.1
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6ImFjY2VzcyJ9.eyJpYXQiOjE2NjE0NzQ2NzYsImV4cCI6MTgxOTI2MjY3NiwiYXVkIjoiaHR0cHM6Ly9teXNlbGZob3N0aW5nLmNvbSIsImlzcyI6ImZlYXRoZXJzIiwic3ViIjoiNjMwNzk5MmIxZDY5ZDMxZjI0OGQ1NTMzIiwianRpIjoiYjg5NTdhNTEtZjNhNy00MWNjLWEwYTMtZmE0NzdkM2ZlNjg1In0.9U-TrtwOawicKWaEwMl2_tMbbYRBdArChtdxqp9N2tg
+
+
+### Expo Updates Example manifest request
+GET http://localhost:3000/api/manifest HTTP/1.1
+expo-current-update-id: b0707c6b-6ae3-1762-d92f-c2a21dad1a0a
+expo-embedded-update-id: 691612f6-e0cc-4e2e-abd1-0b2f994b3667
+accept: multipart/mixed,applicationexpo+json,application/json
+expo-platform: android
+expo-api-version: 1
+expo-updates-environment: BARE
+expo-json-error: true
+expo-accept-signature: false
+eas-client-id: 29b3b611-92e4-4adc-a6d9-8f36121f67cf
+expo-runtime-version: 1.1.1
+expo-release-channel: main
+expo-channel-name: main456
+expo-expect-signature: sig, keyid="main", alg="rsa-v1_5-sha256"
+host: 10.0.0.30:3000
+connection: Keep-Alive
+accept-encoding: gzip
+user-agent: okhttp/4.9.2
+if-none-match: W/"c-NsyIKrDf6fQ7+609QlCVGoC3ovk"
+
+
+### Expo Updates Example Asset request (URL from Manifest)
+GET http://10.0.0.30:3000/api/assets?asset=/updates/customupdates/1.1.1/6308f6a15333310f3e24b409/bundles/android-a2981c79b75b2e0ac9ac3bb17e3865a6.js&contentType=application/javascript&platform=android HTTP/1.1
+
