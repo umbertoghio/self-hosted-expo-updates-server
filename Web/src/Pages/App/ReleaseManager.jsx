@@ -30,12 +30,11 @@ export const ReleaseManager = ({ app }) => {
         value={uploads} paginator rows={10} emptyMessage='No app versions yet'
         selectionMode={releasing ? undefined : 'single'} selection={update} onSelectionChange={({ value }) => setUpdate(value)}
       >
-        <Column field='updateId' header='Update ID' body={({ updateId }) => updateId ? updateId.split('-')[0] + '...' : 'Error'} />
+        <Column field='updateId' header='Update ID' filter sortable />
         <Column field='createdAt' header='Created' sortable body={({ createdAt }) => moment(createdAt).format('YYYY-MM-DD HH:mm:ss')} />
-        <Column field='releaseChannel' header='Rel. Channel' filter sortable />
+        <Column field='releaseChannel' header='Channel' filter sortable />
         <Column field='version' header='Version' filter sortable />
         <Column field='status' header='Status' filter sortable />
-        <Column body={() => <Button round icon='wrench' />} />
       </DataTable>
 
       <Release update={update} releaseState={[releasing, setRelasing]} onHide={() => setUpdate(null)} />

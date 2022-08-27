@@ -17,7 +17,7 @@ export const AppDisplay = ({ app, goto }) => {
         </Flex>
         }
     >
-      <Column field='updateId' header='Update ID' />
+      <Column field='updateId' header='Update ID' filter sortable />
       <Column field='releaseChannel' header='Rel. Channel' filter sortable />
       <Column field='updateRequests' header='Upd. Requests' />
       <Column field='onThisVersion' header='On This Version' />
