@@ -52,6 +52,7 @@ class Service {
 
   async get (id, params) {
     if (id === 'generateSelfSigned') return generateSelfSigned()
+    if (id === 'getUploadKey') return ({ uploadKey: this.app.get('uploadKey') })
     throw new Err.BadRequest('Invalid request.')
   }
 }
