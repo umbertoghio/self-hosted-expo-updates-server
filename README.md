@@ -15,17 +15,21 @@ Features:
 * Manage multiple Versions and Release Channels
 * Send expo updates securely to the server and decide later when / how to release to users
 * Roll back to a previous update
-* Get insight on how many client app downloaded the update, see your changes being released in real time
+* Get insight on how many client app downloaded the update, see your changes being released in realtime
 * Get a ton of info on the update, including git branch, commit, package.json and app.json information
 * Assisted app configuration with self-signed certificate generator.
 * All from a simple Web interface
 
-![image](https://user-images.githubusercontent.com/25666241/187002130-bd4fcf5e-20ab-4dcf-944c-127dd535df68.png)
+Monitor client updates in realtime
+![image](https://user-images.githubusercontent.com/25666241/187029221-8d5a8640-17dd-47e4-8145-fcd1ecd33ab9.png)
 
+A lot of useful information on every update
 ![image](https://user-images.githubusercontent.com/25666241/187002164-56841c80-27f1-4055-9fa2-f1efd6fe3cf7.png)
 
+Details on dependencies to avoid incompatible updates
 ![image](https://user-images.githubusercontent.com/25666241/187002193-ee179043-545e-4c71-ba3d-762447688c27.png)
 
+Roll Back to a previous update
 ![image](https://user-images.githubusercontent.com/25666241/187002214-eaaf68bf-9d17-44b8-afc9-dd27a0f861e0.png)
 
 # Install / Setup
@@ -40,7 +44,7 @@ Otherwise you can build from code, there's a NodeJS API server under the API fol
 
 ## Add your app
 Use the web interface to add your application, just enter the expo slug name
-![image](https://user-images.githubusercontent.com/25666241/187002757-b6cba5f6-7102-4523-bfac-05ace89b88d5.png)
+![image](https://user-images.githubusercontent.com/25666241/187029334-a1748a96-97e1-4efc-af70-631cea61a152.png)
 
 
 ## Setup a script to publish updates
@@ -50,8 +54,7 @@ You can download the ready to use publish script or create your own, the script 
 - Zip the build folder
 - use curl to push the zip file to the server
 
-![image](https://user-images.githubusercontent.com/25666241/187003060-038ad075-4ff5-4a28-90e2-f9f7a4577176.png)
-
+![image](https://user-images.githubusercontent.com/25666241/187029353-9fb6dfe9-913d-4537-900f-673cf7d8e886.png)
 
 ## Generate Self Signed certificate and private key
 In order to validate the update expo needs a certificate.pem inside your app and a private key on the update server.
@@ -62,16 +65,20 @@ Use the SERVER CONFIGURATION section to generate a new self-signed key, make sur
 It is necessary to configure your app.json, android-manifest.xml and Expo.plist properly in order to have this update server working correctly.
 Use the APP CONFIGURATION section to have the relevant configuration auto-generated for your project.
 Particularly important is the url, expo-channel-name and expo-project values in each of the configuration file.
-Make sure to have a runtime version specified too in app.json!
+Make sure to have a runtime version specified.
 
 ## Build a new app
-Updates don't work in dev, you need to build a new app to test the system. You can use the dummy app under the Mobile folder to do your experiments.
+Updates don't work in dev / expo app, you need to build a new app to test the system. You can use the dummy app under the Mobile folder to do your experiments.
 
 ## Publish and release an update
 This part should be the simplest: call the provided script with appropiate parameters and see your update pop in the web UI.
 Release, rollback or delete the updates and see the clients updating in the homepage.
 
+## Monitor the update being downloaded by your client in realtime
+![image](https://user-images.githubusercontent.com/25666241/187029424-6e2d91ca-c691-4b3a-9b32-90e899e700b4.png)
+
+
 # Contribute
-Feel free to clone, costomize and send back PR!
+Feel free to clone, costomize and send back PRs!
 
 Have fun!
