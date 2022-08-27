@@ -51,6 +51,11 @@ const queries = {
     config: queryConfig.rare,
     queryFn: (key, id) => id ? FC.client.service('apps').get(id) : {},
     noInitalPrefetch: true
+  },
+  stats: {
+    config: queryConfig.rare,
+    queryFn: (key, app) => FC.client.service('stats').get(app),
+    noInitalPrefetch: true
   }
 }
 

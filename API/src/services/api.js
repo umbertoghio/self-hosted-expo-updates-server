@@ -38,6 +38,7 @@ class Service {
         updateCount: 1
       })
     }
+    this.app.service('messages').create({ action: 'update', keys: [['stats', headers['expo-project']]] })
   }
 
   async get (id, { query, headers }) {
