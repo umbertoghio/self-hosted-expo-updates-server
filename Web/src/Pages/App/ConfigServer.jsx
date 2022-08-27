@@ -16,8 +16,12 @@ const downloadPem = (certificate, filename) => {
 
 export const ConfigServer = ({ state: [update, setUpdate] }) => {
   const [loading, setLoading] = useState(false)
+  const [needsSave, setNeedsSave] = useState(false)
 
-  const updateField = (field) => (value) => setUpdate({ ...update, [field]: value })
+  const updateField = (field) => (value) => {
+    setUpdate({ ...update, [field]: value })
+    setNeedsSave(true)
+  }
 
   const handleSelfSignedGenerate = async () => {
     setLoading(true)
@@ -28,6 +32,7 @@ export const ConfigServer = ({ state: [update, setUpdate] }) => {
         severity: 'info',
         summary: 'Keys generated succesfully'
       })
+      setNeedsSave(true)
       setLoading(false)
     } catch (e) {
       window.toast.show({
@@ -49,6 +54,7 @@ export const ConfigServer = ({ state: [update, setUpdate] }) => {
         severity: 'info',
         summary: 'App info updated successfully'
       })
+      setNeedsSave(false)
     } catch (e) {
       console.log(e)
       window.toast.show({
@@ -61,7 +67,7 @@ export const ConfigServer = ({ state: [update, setUpdate] }) => {
   }
 
   return (
-    <Card title='SERVER CONFIGURATION' collapsable collapsed fadeIn style={{ padding: 20, width: 900, marginTop: 40 }}>
+    <Card title={`SERVER CONFIGURATION ${needsSave ? ' (MODIFIED, YOU NEED TO SAVE)' : ''}`} collapsable collapsed fadeIn style={{ padding: 20, width: '100%', maxWidth: 900, marginTop: 40 }}>
       <Flex as style={{ padding: 10 }}>
         <Text value={`Application Name: ${update._id}`} bold />
         {loading ? <Spinner /> : <Button label='Generate Self-Signed Keys' onClick={handleSelfSignedGenerate} style={{ marginTop: 20, marginBottom: 20 }} />}

@@ -52,7 +52,7 @@ export const Release = ({ update, onHide }) => {
   if (!update) return null
   return (
     <>
-      <Dialog visible={!!update?._id} modal onHide={releasing ? () => null : onHide} header={<Text value='Upload Details' bold size={28} />}>
+      <Dialog visible={!!update?._id} modal onHide={releasing ? () => null : onHide} style={{ width: '100%', maxWidth: 800, margin: 20 }} header={<Text value='Upload Details' bold size={28} />}>
         <Flex fw as>
           <UpdateInfo update={update} />
           {releasing ? <Spinner /> : <Action />}
@@ -60,7 +60,7 @@ export const Release = ({ update, onHide }) => {
         </Flex>
       </Dialog>
 
-      <Dialog visible={confirming} modal style={{ width: 600 }} onHide={() => setConfirming(false)} header={<Text value='Release Upload to Apps' bold size={28} />}>
+      <Dialog visible={confirming} modal style={{ width: '100%', maxWidth: 600 }} onHide={() => setConfirming(false)} header={<Text value='Release Upload to Apps' bold size={28} />}>
         <Text value={`You are about to release ${update.updateId} to all users in this Release Channel / Version.`} />
         {update.status === 'obsolete' && <Text value='This upload was released in the past before the current one, if you continue users will update to this older version.' style={{ marginTop: 20 }} />}
         <Text value='Are you sure?' style={{ marginTop: 20 }} />
@@ -71,7 +71,7 @@ export const Release = ({ update, onHide }) => {
         </Flex>
       </Dialog>
 
-      <Dialog visible={deleting} modal style={{ width: 600 }} onHide={() => setDeleting(false)} header={<Text value='Delete Upload' bold size={28} />}>
+      <Dialog visible={deleting} modal style={{ width: '100%', maxWidth: 600 }} onHide={() => setDeleting(false)} header={<Text value='Delete Upload' bold size={28} />}>
         <Text value={`You are about to delete ${update.updateId}, all related files will be permanently removed from the server.`} />
         <Text value='Are you sure?' style={{ marginTop: 20 }} />
 

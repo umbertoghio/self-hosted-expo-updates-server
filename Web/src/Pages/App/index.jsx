@@ -18,7 +18,7 @@ export default function App () {
 
   if (!isSuccess) return <Spinner />
   return (
-    <Flex fw js style={{ paddingTop: 20, marginBottom: 300 }}>
+    <Flex fw js style={{ padding: 20, marginBottom: 300 }}>
       <ReleaseManager app={appUpdate} />
       <PublishedUpdates app={appUpdate} />
       <ConfigServer state={[appUpdate, setAppUpdate]} />

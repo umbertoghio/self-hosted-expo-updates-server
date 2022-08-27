@@ -18,7 +18,7 @@ export const ReleaseManager = ({ app }) => {
   if (!uploads.length) {
     return (
       <Card {...cardProps}>
-        <UpdateInstructions />
+        <UpdateInstructions app={app} />
       </Card>
     )
   }
@@ -48,5 +48,5 @@ const cardProps = {
   collapsable: true,
   collapsed: false,
   fadeIn: true,
-  style: { padding: 20, width: 900, marginTop: 20 }
+  style: { padding: 20, width: '100%', maxWidth: 900, marginTop: 20 }
 }

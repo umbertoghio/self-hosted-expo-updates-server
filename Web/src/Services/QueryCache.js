@@ -39,6 +39,10 @@ const queries = {
     queryFn: (key, project) => FC.client.service('uploads').find({ query: { project, $sort: { createdAt: -1 } } }),
     noInitalPrefetch: true
   },
+  uploadKey: {
+    config: queryConfig.rare,
+    queryFn: () => FC.client.service('utils').get('getUploadKey')
+  },
   apps: {
     config: queryConfig.rare,
     queryFn: () => FC.client.service('apps').find({})

@@ -30,8 +30,8 @@ export default function NewApp () {
     }
   }
   return (
-    <Flex fw fh>
-      <Card fadeIn title='NEW EXPO APP' style={{ padding: 20, maxWidth: 400 }}>
+    <Flex fw js style={{ padding: 20, marginBottom: 300 }}>
+      <Card title='NEW EXPO APP' fadeIn style={{ padding: 20, width: '100%', maxWidth: 900 }}>
         <Flex style={{ padding: 10 }}>
           <Input autofocus placeholder='expo slug name' useState={[slug, setSlug]} />
           {loading

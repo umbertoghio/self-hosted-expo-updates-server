@@ -5,7 +5,7 @@ export const getAndroidMetadata = ({ _id, certificate = '' }) => {
   const output = `<meta-data android:name="expo.modules.updates.CODE_SIGNING_CERTIFICATE" android:value="${certificate.split('\r\n').join('&#xA;')}"/>
   <meta-data android:name="expo.modules.updates.CODE_SIGNING_METADATA" android:value="{&quot;keyid&quot;:&quot;main&quot;,&quot;alg&quot;:&quot;rsa-v1_5-sha256&quot;}"/>
   <meta-data android:name="expo.modules.updates.ENABLED" android:value="true"/>
-  <meta-data android:name="expo.modules.updates.EXPO_RUNTIME_VERSION" android:value="1.1.1"/>
+  <meta-data android:name="expo.modules.updates.EXPO_RUNTIME_VERSION" android:value="1.x.y"/>
   <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ERROR_RECOVERY_ONLY"/>
   <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
   <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="${FC.server}/api/manifest"/>
@@ -52,7 +52,8 @@ export const getIOSMetadata = ({ _id, certificate = '' }) => {
 }
 
 export const getUpdateAppjson = ({ _id, certificate = '' }) => {
-  const output = `"updates": {
+  const output = `  "runtimeVersion": "1.x.y",
+  "updates": {
     "url": "${FC.server}/api/manifest",
     "enabled": true,
     "checkAutomatically": "ON_ERROR_RECOVERY",
@@ -72,20 +73,21 @@ export const getUpdateAppjson = ({ _id, certificate = '' }) => {
 
 export const ConfigApp = ({ app }) => {
   return (
-    <Card title='APP CONFIGURATION' collapsable collapsed fadeIn style={{ padding: 20, width: 900, marginTop: 40 }}>
+    <Card title='APP CONFIGURATION' collapsable collapsed fadeIn style={{ padding: 20, width: '100%', maxWidth: 900, marginTop: 40 }}>
 
-      <Text value='Use expo prebuild to setup automatically (currently a patch is required for expo-config, PR open to support requestHeaders)' style={{ marginTop: 10 }} />
-      <Text value='Or use the following configuration in your native apps' style={{ marginTop: 10 }} />
+      <Text value='Use the following configuration in your native apps ' style={{ marginTop: 10 }} />
+      <Text value='Or run "expo prebuild" to setup automatically *' style={{ marginTop: 10 }} />
+      <Text value='* At the moment a patch for expo config available in the expoPatch folder is required, a new PR is open to support requestHeaders automatically.' size={12} style={{ marginTop: 10 }} />
 
       <Text value='Expo Updates config in app.json' style={{ marginTop: 40 }} />
 
       <Input multiline rows={14} useState={[getUpdateAppjson(app), () => null]} style={{ marginTop: 10, width: 800 }} />
 
       <Text value='Expo Updates config in android-manifest.xml' style={{ marginTop: 40 }} />
-      <Input multiline rows={18} useState={[getAndroidMetadata(app), () => null]} style={{ marginTop: 10, width: 800 }} />
+      <Input multiline rows={10} useState={[getAndroidMetadata(app), () => null]} style={{ marginTop: 10, width: 800 }} />
 
       <Text value='Expo Updates config in Expo.plist' style={{ marginTop: 40 }} />
-      <Input multiline rows={18} useState={[getIOSMetadata(app), () => null]} style={{ marginTop: 10, width: 800 }} />
+      <Input multiline rows={10} useState={[getIOSMetadata(app), () => null]} style={{ marginTop: 10, width: 800 }} />
     </Card>
   )
 }
