@@ -33,7 +33,6 @@ module.exports.getPrivateKeyAsync = async () => {
     pemBuffer = fs.readFileSync(path.resolve(privateKeyPath))
     return pemBuffer.toString('utf8')
   } catch (e) {
-    console.log(e)
     return false
   }
 }

@@ -83,6 +83,5 @@ module.exports.generateSelfSigned = async () => {
     privateKey: pki.privateKeyToPem(keyPair.privateKey),
     certificate: pki.certificateToPem(certificate)
   }
-  console.log(result.certificate)
   return result
 }

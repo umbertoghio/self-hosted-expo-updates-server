@@ -11,7 +11,6 @@ const { getJSONInfo } = require('../modules/expo/asset')
 const { getUpdateId } = require('../modules/expo/helpers')
 
 const createDocument = async (context) => {
-  console.log(context.result)
   if (!context.result.id || !context.result.size) {
     throw new Err.GeneralError('Upload failed')
   }

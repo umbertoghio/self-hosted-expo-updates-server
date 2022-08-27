@@ -99,7 +99,6 @@ module.exports.handleManifestResponse = (res) => {
   res.set('cache-control', 'private, max-age=0')
   res.set('content-type', `multipart/mixed; boundary=${res.data.formBoundary}`)
   const buffer = Buffer.from(res.data.formData)
-  console.log(res.data.formData)
   res.write(buffer)
   res.end()
 }
