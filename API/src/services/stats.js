@@ -1,5 +1,5 @@
 const s = require('../hooks/security')
-
+const moment = require('moment')
 class Service {
   constructor (options) {
     this.options = options || {}
@@ -13,23 +13,24 @@ class Service {
     const clients = await this.app.service('clients').find({ query: { project } })
     const stats = {}
 
-    clients.forEach(({ version, embeddedUpdate, currentUpdate, updateCount, releaseChannel }) => {
-      if (!stats[version]) stats[version] = { embeddedUpdate, updates: {} }
-      if (!stats[version].updates[currentUpdate]) stats[version].updates[currentUpdate] = { releaseChannel }
-      stats[version].updates[currentUpdate].onThisVersion = (stats[version].updates[currentUpdate].onThisVersion || 0) + 1
-      stats[version].updates[currentUpdate].updateRequests = (stats[version].updates[currentUpdate].updateRequests || 0) + (updateCount || 0)
+    clients.forEach(({ version, platform, embeddedUpdate, currentUpdate, updateCount, releaseChannel, lastSeen }) => {
+      const key = `${version}-${platform}-${releaseChannel}`
+      if (!stats[key]) stats[key] = { version, platform, releaseChannel, embeddedUpdate, updates: {} }
+      if (!stats[key].updates[currentUpdate]) stats[key].updates[currentUpdate] = { onThisVersion: 0, updateRequests: 0, lastSeen, isBuild: currentUpdate === embeddedUpdate }
+      stats[key].updates[currentUpdate].onThisVersion++
+      stats[key].updates[currentUpdate].updateRequests += (updateCount || 0)
+      if (moment(lastSeen).isAfter(stats[key].updates[currentUpdate].lastSeen)) stats[key].updates[currentUpdate].lastSeen = lastSeen
     })
-    return Object.entries(stats).map(([version, { updates, embeddedUpdate }]) =>
-      ({
-        version,
-        embeddedUpdate,
-        updates: Object.entries(updates).map(
-          ([updateId, fields]) =>
-            ({
-              updateId,
-              ...fields
-            }))
+
+    const result = Object.values(stats).map(({ updates, ...rest }) => ({
+      ...rest,
+      updates: Object.entries(updates).map(([updateId, fields]) => ({
+        updateId,
+        ...fields
       }))
+    })).sort((a, b) => a.version > b.version)
+
+    return result
   }
 }
 
