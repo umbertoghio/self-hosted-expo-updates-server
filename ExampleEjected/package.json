@@ -1,0 +1,29 @@
+{
+  "name": "testupdateapp",
+  "version": "1.0.0",
+  "dependencies": {
+    "expo": "~46.0.9",
+    "expo-modules-autolinking": "~0.10.1",
+    "expo-splash-screen": "~0.16.2",
+    "expo-status-bar": "~1.4.0",
+    "expo-updates": "~0.14.5",
+    "react": "18.0.0",
+    "react-dom": "18.0.0",
+    "react-native": "0.69.5",
+    "react-native-web": "~0.18.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/preset-env": "^7.1.6"
+  },
+  "private": true,
+  "scripts": {
+    "start:packager": "yarn expo start --dev-client",
+    "android:build:devClient": "yarn expo run:android",
+    "android:build:staging": "rm -f Builds/android.ejected.apk; eas build --profile=exampleejected-staging -p android --output=../Builds/android.ejected.apk --local",
+    "ios:build:staging": "rm -f Builds/ios.ejected.ipa; eas build --profile=exampleejected-staging -p ios --output=../Builds/ios.ejected.ipa --local",
+    "android:install": "adb install ../Builds/android.ejected.apk",
+    "expo:prebuild": "yarn expo prebuild",
+    "expo:publish": "cd ..; ./expo-publish-selfhosted.sh 1.1.1 staging ./ExampleEjected abc123def456 http://localhost:3000"
+  }
+}
