@@ -7,7 +7,7 @@ module.exports.handleAssetData = ({ query: { asset, contentType } }) => {
     throw new Err.BadRequest('No asset or contentType provided.')
   }
 
-  if (asset.includes('app.json') || !asset.startsWith('/updates/')) {
+  if (asset.includes('app.json') || asset.includes('package.json') || !asset.startsWith('/updates/')) {
     throw new Err.BadRequest('Invalid asset name.')
   }
 

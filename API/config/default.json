@@ -28,5 +28,6 @@
   "mongodb": "mongodb://db:27017/updater",
   "adminPass": "admin",
   "publicURL": "http://localhost:3000",
-  "uploadKey": "UPLOAD_KEY"
+  "uploadKey": "myUploadKey",
+  "statsThrottle": "5000"
 }

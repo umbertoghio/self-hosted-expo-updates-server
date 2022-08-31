@@ -16,7 +16,7 @@ module.exports.getRequestParams = ({ query, headers }) => {
     throw new Err.BadRequest('Missing expo-runtime-version header or runtime-version qyery provided.')
   }
 
-  const releaseChannel = headers['expo-channel-name'] ?? query['channel-name']
+  const releaseChannel = headers['expo-channel-name'] ?? query.channel
   if (!releaseChannel || typeof releaseChannel !== 'string') {
     throw new Err.BadRequest('Missing expo-channel-name header orchannel-name qyery provided.')
   }
