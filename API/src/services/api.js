@@ -2,6 +2,7 @@ const s = require('../hooks/security')
 const Err = require('@feathersjs/errors')
 const { hanldeManifestData, handleManifestResponse } = require('../modules/expo/manifest')
 const { handleAssetData, handleAssetResponse } = require('../modules/expo/asset')
+const { getRequestParams } = require('../modules/expo/request')
 
 class Service {
   constructor (options) {
@@ -40,15 +41,24 @@ class Service {
   }
 
   async clientMetrics (id, { query, headers }) {
+    const {
+      project,
+      platform,
+      runtimeVersion,
+      releaseChannel
+    } = getRequestParams({ query, headers })
+
     const _id = headers['eas-client-id']
+    const embeddedUpdate = headers['expo-embedded-update-id']
+    const currentUpdate = headers['expo-current-update-id']
     if (!_id) return false
     const [client] = await this.app.service('clients').find({ query: { _id } })
     if (client) {
       await this.app.service('clients').patch(client._id, {
         lastSeen: new Date().toISOString(),
-        version: headers['expo-runtime-version'],
-        embeddedUpdate: headers['expo-embedded-update-id'],
-        currentUpdate: headers['expo-current-update-id'],
+        version: runtimeVersion,
+        embeddedUpdate,
+        currentUpdate,
         updateCount: 1 + (client.updateCount || 0)
       })
     } else {
@@ -56,16 +66,16 @@ class Service {
         _id: headers['eas-client-id'],
         lastSeen: new Date().toISOString(),
         firstSeen: new Date().toISOString(),
-        project: headers['expo-project'],
-        version: headers['expo-runtime-version'],
-        platform: headers['expo-platform'],
-        releaseChannel: headers['expo-channel-name'],
-        embeddedUpdate: headers['expo-embedded-update-id'],
-        currentUpdate: headers['expo-current-update-id'],
+        project,
+        version: runtimeVersion,
+        platform,
+        releaseChannel,
+        embeddedUpdate,
+        currentUpdate,
         updateCount: 1
       })
     }
-    this.updateClientsReactQuery(headers['expo-project'])
+    this.updateClientsReactQuery(project)
   }
 
   async get (id, { query, headers }) {
@@ -85,8 +95,9 @@ module.exports = {
   name: 'api',
   createService: (options) => apiService,
   middleware: (req, res, next) => {
-    if (res.data.type === 'manifest') handleManifestResponse(res)
-    if (res.data.type === 'asset') handleAssetResponse(res)
+    if (res.data.type === 'manifest') return handleManifestResponse(res)
+    if (res.data.type === 'asset') return handleAssetResponse(res)
+    next()
   },
   hooks: {
     before: {
