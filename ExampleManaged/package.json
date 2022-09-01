@@ -1,0 +1,24 @@
+{
+  "name": "examplemanaged",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "dependencies": {
+    "expo": "~46.0.9",
+    "expo-status-bar": "~1.4.0",
+    "expo-updates": "~0.14.5",
+    "react": "18.0.0",
+    "react-native": "0.69.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/preset-env": "^7.1.6"
+  },
+  "scripts": {
+    "start:packager": "yarn expo start",
+    "android:build:staging": "rm -f Builds/android.managed.apk; eas build --profile=examplemanaged-staging -p android --output=../Builds/android.managed.apk --local",
+    "ios:build:staging": "rm -f Builds/ios.managed.ipa; eas build --profile=examplemanaged-staging -p ios --output=../Builds/ios.managed.ipa --local",
+    "android:install": "adb install ../Builds/android.managed.apk",
+    "expo:publish": "cd ..; ./expo-publish-selfhosted.sh 1.1.1 staging ./ExampleManaged abc123def456 http://localhost:3000"
+  },
+  "private": true
+}

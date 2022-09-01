@@ -1,0 +1,32 @@
+{
+  "cli": {
+    "version": ">= 0.43.0"
+  },
+  "build": {
+
+    "examplemanaged-development": {
+      "releaseChannel": "development",
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "examplemanaged-staging": {
+      "releaseChannel": "main",
+      "android": {
+        "buildType": "apk"
+      },
+      "distribution": "internal"
+    },
+    "examplemanaged-production": {
+      "releaseChannel": "production",
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
