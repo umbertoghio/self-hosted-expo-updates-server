@@ -1,5 +1,8 @@
 version: '3.7'
-services:
+
+# See detailed comments in the production docker-compose
+# This configuration should work fine for local development, restart the API container once the DB is online in order to create the admin user automatically.
+services: 
   api:
     build:
       context: ../../API
@@ -25,6 +28,7 @@ services:
       - UPLOAD_KEY=abc123def456
       - NODE_ENV=development
       - PUBLIC_URL=http://10.0.0.30:3000
+      - DASBHOARD_THROTTLE_MSEC=5000
     command: npx nodemon --inspect=0.0.0.0 src/index.js
 
   web:

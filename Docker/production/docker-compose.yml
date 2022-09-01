@@ -7,18 +7,19 @@ services:
     depends_on:
       - self_hosted_expo_updates_server_db
     volumes:
-      - ./updates:/updates
-      - ./uploads:/uploads
+      - ./updates:/updates # This will store the unzipped updates
+      - ./uploads:/uploads # This will hold a copy of the publishes in a zip format
     ports:
       - 3000:3000
     environment:
-      - TZ=Europe/Rome
-      - FEATHERS_AUTH_SECRET=EnterHereYourCustomSecret
-      - MONGO_CONN=mongodb://expo@myRegularUserPassw:self_hosted_expo_updates_server_db:27017/expo
-      - ADMIN_PASSWORD=devserver
-      - UPLOAD_KEY=abc123def456
+      - TZ=Europe/Rome # Timezone
+      - FEATHERS_AUTH_SECRET=EnterHereYourCustomSecret # Custom secret for feathers authentication and JWT generation
+      - MONGO_CONN=mongodb://expo@myRegularUserPassw:self_hosted_expo_updates_server_db:27017/expo # MongoDB connection string, see mongoinit/init.js
+      - ADMIN_PASSWORD=devserver # Password for the admin user
+      - UPLOAD_KEY=abc123def456 # Key used in the expo publish custom script
       - NODE_ENV=production
-      - PUBLIC_URL=https://api.myserverpublic
+      - PUBLIC_URL=https://api.myserverpublic # Public URL for the server, better if it is a https URL
+      - DASBHOARD_THROTTLE_MSEC=5000 # No more than one refresh every 5 seconds fror the dashboard
   self_hosted_expo_updates_server_web:
     image: ghcr.io/umbertoghio/self-hosted-expo-updates-server-web:latest
     container_name: self_hosted_expo_updates_server_web
@@ -26,9 +27,9 @@ services:
     depends_on:
       - self_hosted_expo_updates_server_api
     ports:
-      - 8080:80
+      - 8080:80 # Put this behind an https reverse proxy if you want to use it in production
     environment:
-      - API_BASE_URL=https://api.myserverpublic
+      - API_BASE_URL=https://api.myserverpublic # URL of the API server
 
   self_hosted_expo_updates_server_db:
     container_name: self_hosted_expo_updates_server_db
@@ -39,10 +40,10 @@ services:
       - 27017:27017
     volumes:
       - self_hosted_mongo_data:/data/db
-      - ./mongoinit:/docker-entrypoint-initdb.d/
+      - ./mongoinit:/docker-entrypoint-initdb.d/ # Set database user credenzials in mongoinit/init.js
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=myPRODUCTIONPassword
+      - MONGO_INITDB_ROOT_PASSWORD=myPRODUCTIONPassword # Root/admin password for administration
       - MONGO_INITDB_DATABASE=expo
     command: mongod --bind_ip=0.0.0.0 --logpath=/dev/null
 
