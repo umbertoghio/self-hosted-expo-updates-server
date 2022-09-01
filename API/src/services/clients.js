@@ -2,6 +2,7 @@ const s = require('../hooks/security')
 
 module.exports = {
   name: 'clients',
+  noBsonIDs: true,
   hooks: {
     before: {
       all: s.defaultSecurity(),

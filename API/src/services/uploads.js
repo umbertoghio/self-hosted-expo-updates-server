@@ -2,6 +2,7 @@ const s = require('../hooks/security')
 
 module.exports = {
   name: 'uploads',
+  noBsonIDs: true,
   hooks: {
     before: {
       all: s.defaultSecurity(),
