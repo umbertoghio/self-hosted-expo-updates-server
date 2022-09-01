@@ -8,17 +8,7 @@
   "scripts": {
     "---Dev API & Web---": "",
     "dev:run": "cd Docker/development; docker-compose up --build",
-    "dev:stop": "cd Docker/development; docker-compose down",
-    "---Publish Update---": "",
-    "expo-publish": "./expo-publish-selfhosted.sh 1.1.1 staging ./Mobile abc123def456 http://localhost:3000",
-    "---Mobile---": "",
-    "mobile:start:packager": "cd Mobile; yarn expo start --dev-client",
-    "android:build:devClient": "cd Mobile; yarn expo run:android",
-    "android:build:staging": "rm -f Builds/android.apk;cd Mobile; eas build --profile=customupdates-staging -p android --output=../Builds/android.apk --local",
-    "ios:build:staging": "rm -f Builds/android.ipa;cd Mobile; eas build --profile=customupdates-staging -p ios --output=../Builds/android.apk --local",
-    "android:install": "adb install Builds/android.apk",
-    "expo-patch": "rm -rf Mobile/node_modules/@expo/config-plugins/build && cp -r expoPatch/build Mobile/node_modules/@expo/config-plugins",
-    "expo:prebuild": "cd Mobile; yarn expo prebuild"
+    "dev:stop": "cd Docker/development; docker-compose down"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

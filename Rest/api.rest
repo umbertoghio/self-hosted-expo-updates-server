@@ -17,13 +17,13 @@ Content-Type: application/json
 
 
 ### Example of authenticated request
-GET http://localhost:3000/stats/customupdates HTTP/1.1
+GET http://localhost:3000/stats/exampleejected HTTP/1.1
 Content-Type: application/json
-Authorization: json-from=authentication
+Authorization: jsonFromAuthentication
 
 
 ### Expo Updates Example manifest request
-GET http://localhost:3000/api/manifest HTTP/1.1
+GET http://localhost:3000/api/manifest?project=exampleejected&channel=staging HTTP/1.1
 expo-current-update-id: b0707c6b-6ae3-1762-d92f-c2a21dad1a0a
 expo-embedded-update-id: 691612f6-e0cc-4e2e-abd1-0b2f994b3667
 accept: multipart/mixed,applicationexpo+json,application/json
