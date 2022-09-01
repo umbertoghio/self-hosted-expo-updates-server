@@ -18,7 +18,7 @@
     "android:build:staging": "rm -f Builds/android.managed.apk; eas build --profile=examplemanaged-staging -p android --output=../Builds/android.managed.apk --local",
     "ios:build:staging": "rm -f Builds/ios.managed.ipa; eas build --profile=examplemanaged-staging -p ios --output=../Builds/ios.managed.ipa --local",
     "android:install": "adb install ../Builds/android.managed.apk",
-    "expo:publish": "cd ..; ./expo-publish-selfhosted.sh 1.1.1 staging ./ExampleManaged abc123def456 http://localhost:3000"
+    "expo:publish": "cd ..; ./expo-publish-selfhosted.sh staging ./ExampleManaged abc123def456 http://localhost:3000"
   },
   "private": true
 }

@@ -23,6 +23,6 @@
     "android:build:staging": "rm -f Builds/android.ejected.apk; eas build --profile=exampleejected-staging -p android --output=../Builds/android.ejected.apk --local",
     "ios:build:staging": "rm -f Builds/ios.ejected.ipa; eas build --profile=exampleejected-staging -p ios --output=../Builds/ios.ejected.ipa --local",
     "android:install": "adb install ../Builds/android.ejected.apk",
-    "expo:publish": "cd ..; ./expo-publish-selfhosted.sh 1.1.1 staging ./ExampleEjected abc123def456 http://localhost:3000"
+    "expo:publish": "cd ..; ./expo-publish-selfhosted.sh staging ./ExampleEjected abc123def456 http://localhost:3000"
   }
 }

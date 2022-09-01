@@ -51,7 +51,7 @@ export default function App () {
         <Text style={{ color: 'white', fontSize: 18 }}>Reload App </Text>
       </TouchableOpacity>
 
-      <Text>This is the update number 9</Text>
+      <Text>This is the update number 11</Text>
 
       <Text>{update}</Text>
       <Image source={require('./assets/img.png')} style={{ width: 100, height: 100 }} />
