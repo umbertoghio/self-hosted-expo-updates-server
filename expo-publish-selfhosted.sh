@@ -2,27 +2,19 @@
 
 # This is the publish script for self-hosted expo updates.
 
-APPVERSION=$1
-RELEASECHANNEL=$2
-PROJECTPATH=$3
-UPLOADKEY=$4
-APISERVER=$5
+RELEASECHANNEL=$1
+PROJECTPATH=$2
+UPLOADKEY=$3
+APISERVER=$4
 
 showUsage () {
-  printf "Usage: expo-publish-selfhosted.sh <version> <release-channel> <expo-project-folder> <upload-key> <api-server> \n"
-  printf "Example: expo-publish-selfhosted.sh 1.0.1 staging ~/expo/myproject abc123def456 http://localhost:3000 \n"
+  printf "Usage: expo-publish-selfhosted.sh <release-channel> <expo-project-folder> <upload-key> <api-server> \n"
+  printf "Example: expo-publish-selfhosted.sh staging ~/expo/myproject abc123def456 http://localhost:3000 \n"
 }
 
 ###############################################################################
 # Check that all the required parameters are present.
 ###############################################################################
-
-# Checking Version
-if [ -z "$APPVERSION" ]; then
-      printf "Error: missing version parameter.\n"
-      showUsage
-      exit 1
-fi
 
 # Checking Release Channel
 if [ -z "$RELEASECHANNEL" ]; then
@@ -66,8 +58,9 @@ fi
 
 # Getting project slug for project name
 SLUG=$(grep -o '"slug": "[^"]*' app.json | grep -o '[^"]*$')
+RUNTIMEVERSION=$(grep -o '"runtimeVersion": "[^"]*' app.json | grep -o '[^"]*$')
 
-BUILDFOLDER=/tmp/$SLUG-$APPVERSION-$RELEASECHANNEL
+BUILDFOLDER=/tmp/$SLUG-$RUNTIMEVERSION-$RELEASECHANNEL
 PAYLOAD="\"$BUILDFOLDER.zip\""
 
 # Idempotent cleanup
@@ -82,7 +75,6 @@ yarn expo export --experimental-bundle --output-dir $BUILDFOLDER
 cp app.json $BUILDFOLDER/
 cp package.json $BUILDFOLDER/
 
-
 # Compress update
 cd $BUILDFOLDER
 zip -q $BUILDFOLDER.zip -r ./*
@@ -92,7 +84,7 @@ cd -
 curl --location --request POST "$APISERVER/upload" \
 --form "uri=@$PAYLOAD" \
 --header "project: $SLUG" \
---header "version: $APPVERSION" \
+--header "version: $RUNTIMEVERSION" \
 --header "release-channel: $RELEASECHANNEL" \
 --header "upload-key: $UPLOADKEY"  \
 --header "git-branch: $(git rev-parse --abbrev-ref HEAD)" \

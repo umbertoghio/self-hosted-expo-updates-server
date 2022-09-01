@@ -15,7 +15,7 @@ zip -q updatename.zip -r ./*
 cd -
 
 # Upload update to server
-curl --location --request POST '${server}upload' \\ 
+curl --location --request POST '${server}/upload' \\ 
 --form "uri=@/path/to/updatename.zip" \\ 
 --header "project: ${slug}" \\ 
 --header "version: 1.1.1" \\ 
@@ -40,7 +40,7 @@ export const UpdateInstructions = ({ app }) => {
   return (
     <>
       <Text value='There are no updates found.' />
-      <Button icon='download' label='Download publish script' onClick={handleDownload} style={{ marginTop: 20, marginBottom: 20, width: 300 }}>Create</Button>
+      <Button icon='download' label='Download publish script' onClick={handleDownload} style={{ marginTop: 20, marginBottom: 20, width: 350 }}>Create</Button>
 
       <Text value='Or Build your own script using this snippet:' />
       <Input multiline rows={10} useState={[snippet, () => null]} style={{ marginTop: 10, width: '100%' }} />
