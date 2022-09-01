@@ -2,11 +2,11 @@ import { Card, Text, Input } from '../../Components'
 import { FC } from '../../Services'
 
 export const getAndroidMetadata = ({ _id, certificate = '' }) => {
-  const output = `<meta-data android:name="expo.modules.updates.CODE_SIGNING_CERTIFICATE" android:value="${certificate.split('\r\n').join('&#xA;')}"/>
+  const output = `<meta-data android:name="expo.modules.updates.CODE_SIGNING_CERTIFICATE" android:value="${certificate.split('\r\n').join('&#xD;&#xA;')}"/>
   <meta-data android:name="expo.modules.updates.CODE_SIGNING_METADATA" android:value="{&quot;keyid&quot;:&quot;main&quot;,&quot;alg&quot;:&quot;rsa-v1_5-sha256&quot;}"/>
   <meta-data android:name="expo.modules.updates.ENABLED" android:value="true"/>
   <meta-data android:name="expo.modules.updates.EXPO_RUNTIME_VERSION" android:value="1.x.y"/>
-  <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ERROR_RECOVERY_ONLY"/>
+  <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="NEVER"/>
   <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
   <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="${FC.server}/api/manifest?project=${_id}&amp;channel=myReleaseChannel"/>
   `
@@ -19,10 +19,9 @@ export const getIOSMetadata = ({ _id, certificate = '' }) => {
   <plist version="1.0">
     <dict>
       <key>EXUpdatesCheckOnLaunch</key>
-      <string>ERROR_RECOVERY_ONLY</string>
+      <string>NEVER</string>
       <key>EXUpdatesCodeSigningCertificate</key>
       <string>${certificate.split('\r\n').join('&#xD;\r\n')}</string>
-  </string>
       <key>EXUpdatesCodeSigningMetadata</key>
       <dict>
         <key>keyid</key>
