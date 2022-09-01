@@ -8,8 +8,7 @@ export const getAndroidMetadata = ({ _id, certificate = '' }) => {
   <meta-data android:name="expo.modules.updates.EXPO_RUNTIME_VERSION" android:value="1.x.y"/>
   <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ERROR_RECOVERY_ONLY"/>
   <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
-  <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="${FC.server}/api/manifest"/>
-  <meta-data android:name="expo.modules.updates.UPDATES_CONFIGURATION_REQUEST_HEADERS_KEY" android:value="{'expo-channel-name':'myReleaseChannel', 'expo-project': '${_id}'}"/>
+  <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="${FC.server}/api/manifest?project=${_id}&amp;channel=myReleaseChannel"/>
   `
   return output
 }
@@ -35,17 +34,10 @@ export const getIOSMetadata = ({ _id, certificate = '' }) => {
       <true/>
       <key>EXUpdatesLaunchWaitMs</key>
       <integer>0</integer>
-      <key>EXUpdatesRequestHeaders</key>
-      <dict>
-        <key>expo-channel-name</key>
-        <string>myReleaseChannel</string>
-        <key>expo-project</key>
-        <string>${_id}</string>
-      </dict>
       <key>EXUpdatesRuntimeVersion</key>
-      <string>1.1.1</string>
+      <string>1.x.y</string>
       <key>EXUpdatesURL</key>
-      <string>${FC.server}/api/manifest</string>
+      <string>${FC.server}/api/manifest?project=${_id}&amp;channel=myReleaseChannel</string>
     </dict>
   </plist>`
   return output
@@ -54,7 +46,7 @@ export const getIOSMetadata = ({ _id, certificate = '' }) => {
 export const getUpdateAppjson = ({ _id, certificate = '' }) => {
   const output = `  "runtimeVersion": "1.x.y",
   "updates": {
-    "url": "${FC.server}/api/manifest",
+    "url": "${FC.server}/api/manifest?project=${_id}&channel=myReleaseChannel",
     "enabled": true,
     "checkAutomatically": "ON_ERROR_RECOVERY",
     "fallbackToCacheTimeout": 0,
@@ -62,10 +54,6 @@ export const getUpdateAppjson = ({ _id, certificate = '' }) => {
     "codeSigningMetadata": {
       "keyid": "main",
       "alg": "rsa-v1_5-sha256"
-    },
-    "requestHeaders": {
-      "expo-channel-name":"myReleaseChannel",
-      "expo-project": "${_id}"
     }
   },`
   return output
@@ -75,13 +63,11 @@ export const ConfigApp = ({ app }) => {
   return (
     <Card title='APP CONFIGURATION' collapsable collapsed fadeIn style={{ padding: 20, width: '100%', maxWidth: 900, marginTop: 40 }}>
 
-      <Text value='Use the following configuration in your native apps ' style={{ marginTop: 10 }} />
-      <Text value='Or run "expo prebuild" to setup automatically *' style={{ marginTop: 10 }} />
-      <Text value='* At the moment a patch for expo config available in the expoPatch folder is required, a new PR is open to support requestHeaders automatically.' size={12} style={{ marginTop: 10 }} />
+      <Text value='Expo Updates configuration in app.json, runtimeVersion is required.' style={{ marginTop: 40 }} />
 
-      <Text value='Expo Updates config in app.json' style={{ marginTop: 40 }} />
+      <Input multiline rows={9} useState={[getUpdateAppjson(app), () => null]} style={{ marginTop: 10, width: 800 }} />
 
-      <Input multiline rows={14} useState={[getUpdateAppjson(app), () => null]} style={{ marginTop: 10, width: 800 }} />
+      <Text value='For ejected apps run "expo prebuild" to setup automatically native iOS and Android settings after you set app.json, or use the generated code below.' style={{ marginTop: 10 }} />
 
       <Text value='Expo Updates config in android-manifest.xml' style={{ marginTop: 40 }} />
       <Input multiline rows={10} useState={[getAndroidMetadata(app), () => null]} style={{ marginTop: 10, width: 800 }} />
