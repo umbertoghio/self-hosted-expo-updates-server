@@ -21,7 +21,8 @@ Features:
 * All from a simple Web interface
 
 Monitor client updates in realtime
-![image](https://user-images.githubusercontent.com/25666241/187808322-cdb034ff-348d-426e-8df3-7f2edbcfaf5f.png)
+
+![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/25666241/188273081-d55da67d-0906-4348-bc0c-714286e8e812.gif)
 
 A lot of useful information on every update
 ![image](https://user-images.githubusercontent.com/25666241/187002164-56841c80-27f1-4055-9fa2-f1efd6fe3cf7.png)
