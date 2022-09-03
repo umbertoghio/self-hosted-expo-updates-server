@@ -72,9 +72,25 @@ If you are on an Ejected project you can run `expo prebuild` to autogenerate the
 ## Build a new app
 Updates don't work in dev / expo app, you need to build a new app to test the system. You can use the provided examples (Managed and Ejected) in the relative folders, in order to build it is necessary to do a regular `expo publish` first in order to generate the proper configuration on the Expo servers. The provided example app have a button to request and download an update if present, and another button to reload the app.
 It is expected that an app will automatically do this operation on start, check out [expo-custom-updater](https://github.com/umbertoghio/expo-custom-updater)
+
+IMPORTANT:
+While developing your Ejected / BARE application with Expo Dev, make sure you allow unsigned manifests, otherwise you may get erorrs when loading up code and images form your local expo instance.
+
+AndroidManifest.xml
+```
+    <meta-data android:name="expo.modules.updates.CODE_SIGNING_ALLOW_UNSIGNED_MANIFESTS" android:value="true"/>
+```
+
+Expo.plist
+```
+<key>EXUpdatesConfigCodeSigningAllowUnsignedManifests</key>
+<true/>
+```
+Remember to set those back to false before staging / production build, otherwise the certificate configuration will be skipped.
+
 Once the app pings the update server you will see an update appearing in the homepage, and after an update / download / reload cycle the updated app will reflect in the dashboar AFTER it asks for an update again.
 
-![image](https://user-images.githubusercontent.com/25666241/187808093-743afc83-77c1-4ed0-afc8-bd1d9ed0691e.png)
+![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/25666241/188273081-d55da67d-0906-4348-bc0c-714286e8e812.gif)
 
 
 ## Publish and release an update
