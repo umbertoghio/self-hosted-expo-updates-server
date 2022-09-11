@@ -20,19 +20,20 @@ const getSignature = async ({ headers, manifest, privateKey }) => {
   return ({ 'expo-signature': serializeDictionary(dictionary) })
 }
 
-module.exports.hanldeManifestData = async (app, { query, headers }) => {
-  const {
-    project,
-    platform,
-    runtimeVersion,
-    releaseChannel
-  } = getRequestParams({ query, headers })
+const terminateResponse = (res, message) => {
+  res.write(JSON.stringify({ message }))
+  res.end()
+}
+
+module.exports.hanldeManifestData = async (app, { query, headers }, res) => {
+  const { error, project, platform, runtimeVersion, releaseChannel } = getRequestParams({ query, headers })
+  if (error) return terminateResponse(res, error)
 
   const [update] = await app.service('uploads').find({ query: { project, version: runtimeVersion, releaseChannel, status: 'released' } })
-  if (!update) return { message: 'No uploads found' }
+  if (!update) return terminateResponse(res, 'No uploads found')
 
   const application = await app.service('apps').get(update.project)
-  if (!application) return { message: 'No application found' }
+  if (!application) return terminateResponse(res, 'No application found')
 
   try {
     const { metadataJson, createdAt, id } = getMetadataSync(update)
@@ -83,22 +84,14 @@ module.exports.hanldeManifestData = async (app, { query, headers }) => {
       contentType: 'application/json'
     })
 
-    return {
-      type: 'manifest',
-      formBoundary: form.getBoundary(),
-      formData: form.getBuffer().toString()
-    }
+    res.set('expo-protocol-version', 0)
+    res.set('expo-sfv-version', 0)
+    res.set('cache-control', 'private, max-age=0')
+    res.set('content-type', `multipart/mixed; boundary=${form.getBoundary()}`)
+    res.write(form.getBuffer())
+    res.end()
   } catch (error) {
-    throw new Err.BadRequest(JSON.stringify('error'))
+    terminateResponse(res, error.message)
+    throw new Err.BadRequest(JSON.stringify(error))
   }
-}
-
-module.exports.handleManifestResponse = (res) => {
-  res.set('expo-protocol-version', 0)
-  res.set('expo-sfv-version', 0)
-  res.set('cache-control', 'private, max-age=0')
-  res.set('content-type', `multipart/mixed; boundary=${res.data.formBoundary}`)
-  const buffer = Buffer.from(res.data.formData)
-  res.write(buffer)
-  res.end()
 }

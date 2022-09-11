@@ -2,31 +2,28 @@ const Err = require('@feathersjs/errors')
 const path = require('path')
 const fs = require('fs')
 
-module.exports.handleAssetData = ({ query: { asset, contentType } }) => {
-  if (!asset || !contentType) {
-    throw new Err.BadRequest('No asset or contentType provided.')
-  }
+const getAssetInfo = ({ asset, contentType }) => {
+  if (!asset || !contentType) return ({ error: 'No asset or contentType provided.' })
+  if (asset.includes('app.json') || asset.includes('package.json') || !asset.startsWith('/updates/')) return ({ error: 'Invalid asset name.' })
 
-  if (asset.includes('app.json') || asset.includes('package.json') || !asset.startsWith('/updates/')) {
-    throw new Err.BadRequest('Invalid asset name.')
-  }
+  const file = { contentType: decodeURI(contentType) }
+  file.path = path.resolve(asset)
+  if (!fs.existsSync(file.path)) return ({ error: `Asset "${asset}" does not exist.` })
 
-  const assetPath = path.resolve(path.join(asset))
-  if (!fs.existsSync(assetPath)) {
-    throw new Err.BadRequest(`Asset "${asset}" does not exist.`)
-  }
+  // Trim /updates from file.path to get the relative path
+  file.path = file.path.replace(/^\/updates/, '')
 
-  return {
-    type: 'asset',
-    path: assetPath,
-    contentType: decodeURI(contentType)
-  }
+  return file
 }
 
-module.exports.handleAssetResponse = (res) => {
-  const asset = fs.readFileSync(res.data.path, null)
-  res.type(res.data.contentType)
-  res.end(asset)
+module.exports.handleAssetData = ({ asset, contentType }, res) => {
+  const file = getAssetInfo({ asset, contentType })
+  if (file.error) return res.end(JSON.stringify(file))
+
+  res.type(file.contentType)
+  res.sendFile(file.path, { root: '/updates' }, function (err) {
+    if (err) console.log('Error sending file: ', file.path, file.contentType, err)
+  })
 }
 
 module.exports.getJSONInfo = ({ path: paramPath }) => {

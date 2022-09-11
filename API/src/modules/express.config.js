@@ -8,6 +8,8 @@ const cors = require('cors')
 
 const addWebhookRawBody = (req, res, buf) => { req.url && req.url === '/webhooks' && (req.rawBody = buf) }
 
+const expoapi = require('./expo/api')
+
 module.exports = (express) => (app) => {
   // Enable security, CORS, compression, favicon and body parsing
   app.use(helmet({ contentSecurityPolicy: false }))
@@ -19,4 +21,7 @@ module.exports = (express) => (app) => {
   // Host the public folder and Favicon
   app.use('/', express.static(app.get('public')))
   app.use(favicon(path.join(app.get('public'), 'favicon.ico')))
+
+  // Set up our API service as simple Express middleware
+  app.use('/api', expoapi(app))
 }
