@@ -9,7 +9,7 @@ db.createUser({
   roles: [
     {
       role: 'readWrite',
-      db: 'updater'
+      db: 'expo'
     }
   ]
 })
