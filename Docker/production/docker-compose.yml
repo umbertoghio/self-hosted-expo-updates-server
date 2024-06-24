@@ -27,7 +27,7 @@ services:
     depends_on:
       - self_hosted_expo_updates_server_api
     ports:
-      - 8080:80 # Put this behind an https reverse proxy if you want to use it in production
+      - 8080:8080 # Put this behind an https reverse proxy if you want to use it in production
     environment:
       - API_BASE_URL=https://api.myserverpublic # URL of the API server
 
