@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Env Loader
-cd /app/Deploy
+cd /app/deploy
 ./loadEnv.sh dockerEnv
 mv env-config.js /app/public/
 
