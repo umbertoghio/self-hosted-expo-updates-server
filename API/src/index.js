@@ -15,7 +15,7 @@ const server = app.listen(app.get('port'))
 
 const createAdminIfMissing = async () => {
   await new Promise(resolve => setTimeout(resolve, 1000))
-  const [admin] = await app.services.users.find({ qyery: { username: 'admin' } })
+  const [admin] = await app.services.users.find({ query: { username: 'admin' } })
   if (!admin) app.services.users.create({ username: 'admin', password: app.get('adminPass'), role: 'admin' })
 }
 server.on('listening', () => {
