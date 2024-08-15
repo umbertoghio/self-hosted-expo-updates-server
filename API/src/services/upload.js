@@ -65,7 +65,7 @@ const createDocument = async (context) => {
   context.result.uploadId = upload._id
   context.result.project = upload.project
   context.result.releaseChannel = upload.releaseChannel
-  context.result.message = 'Upload successful, use the web UI to release updateId'
+  context.result.message = 'Upload successful, use the web UI to release id: ' + upload._id
 
   context.app.service('messages').create({ action: 'update', keys: 'uploads' })
   return context
