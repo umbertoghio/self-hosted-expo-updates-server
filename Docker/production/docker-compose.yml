@@ -14,7 +14,7 @@ services:
     environment:
       - TZ=Europe/Rome # Timezone
       - FEATHERS_AUTH_SECRET=EnterHereYourCustomSecret # Custom secret for feathers authentication and JWT generation
-      - MONGO_CONN=mongodb://expo@myRegularUserPassw:self_hosted_expo_updates_server_db:27017/expo # MongoDB connection string, see mongoinit/init.js
+      - MONGO_CONN=mongodb://expo:myRegularUserPassw@self_hosted_expo_updates_server_db:27017/expo # MongoDB connection string, see mongoinit/init.js
       - ADMIN_PASSWORD=devserver # Password for the admin user
       - UPLOAD_KEY=abc123def456 # Key used in the expo publish custom script
       - NODE_ENV=production
