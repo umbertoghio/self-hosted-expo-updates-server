@@ -59,7 +59,11 @@ module.exports.hanldeManifestData = async (app, { query, headers }) => {
         runtimeVersion,
         platform,
         ext: null
-      })
+      }),
+      metadata: {},
+      extra: {
+        expoClient: update.appJson
+      }
     }
 
     const assetRequestHeaders = {};
