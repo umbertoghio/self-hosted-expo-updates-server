@@ -93,8 +93,8 @@ module.exports.hanldeManifestData = async (app, { query, headers }) => {
   }
 }
 
-module.exports.handleManifestResponse = (res) => {
-  res.set('expo-protocol-version', 0)
+module.exports.handleManifestResponse = (res, protocolVersion) => {
+  res.set('expo-protocol-version', protocolVersion)
   res.set('expo-sfv-version', 0)
   res.set('cache-control', 'private, max-age=0')
   res.set('content-type', `multipart/mixed; boundary=${res.data.formBoundary}`)
