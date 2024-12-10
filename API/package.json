@@ -13,7 +13,7 @@
     "config": "config/"
   },
   "engines": {
-    "node": "^16.0.0",
+    "node": "^22.0.0",
     "yarn": ">= 0.18.0"
   },
   "standard": {

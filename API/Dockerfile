@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:22-alpine
 RUN apk update && apk add --no-cache tzdata
 RUN mkdir -p /home/node/server && chown -R node:node /home/node/server
 WORKDIR /home/node/server
