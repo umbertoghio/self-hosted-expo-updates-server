@@ -95,7 +95,9 @@ module.exports = {
   name: 'api',
   createService: (options) => apiService,
   middleware: (req, res, next) => {
-    if (res.data.type === 'manifest') return handleManifestResponse(res)
+    const protocolVersion = req.headers["expo-protocol-version"];
+
+    if (res.data.type === 'manifest') return handleManifestResponse(res, protocolVersion)
     if (res.data.type === 'asset') return handleAssetResponse(res)
     next()
   },
