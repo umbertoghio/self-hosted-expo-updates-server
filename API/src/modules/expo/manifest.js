@@ -59,7 +59,11 @@ module.exports.hanldeManifestData = async (app, { query, headers }) => {
         runtimeVersion,
         platform,
         ext: null
-      })
+      }),
+      metadata: {},
+      extra: {
+        expoClient: update.appJson
+      }
     }
 
     const assetRequestHeaders = {};
@@ -74,7 +78,7 @@ module.exports.hanldeManifestData = async (app, { query, headers }) => {
     form.append('manifest', JSON.stringify(manifest), {
       contentType: 'application/json',
       header: {
-        'content-type': 'application/json; charset=utf-8',
+        'Content-Type': 'application/json; charset=utf-8',
         ...(await getSignature({ headers, manifest, privateKey: application.privateKey }))
       }
     })
