@@ -51,7 +51,7 @@ Use the web interface to add your application, just enter the expo slug name
 
 ## Setup a script to publish updates
 You can download the ready to use publish script or create your own, the script logic is simple: 
-- use `expo publish --experimental-bundle` to generate an update
+- use `expo export` to generate an update
 - Add app.json and package.json to the build folder
 - Zip the build folder
 - use curl to push the zip file to the server

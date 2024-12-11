@@ -3,7 +3,7 @@ import { FC, useCQuery } from '../../Services'
 
 const getSnippet = ({ server, slug, uploadKey }) => `# Expo publish to local folder
 cd /my/app/folder
-yarn expo export --experimental-bundle --output-dir /path/to/build/folder
+yarn expo export --output-dir /path/to/build/folder
 
 # Add app.json & package.json to the build for info & Metadata
 cp app.json /path/to/build/folder/
