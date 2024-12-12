@@ -69,7 +69,7 @@ rm -f $BUILDFOLDER.zip
 mkdir $BUILDFOLDER
 
 # Build update
-yarn expo export --experimental-bundle --output-dir $BUILDFOLDER
+yarn expo export --output-dir $BUILDFOLDER
 
 # Add app.json & package.json to the build for info & Metadata
 cp app.json $BUILDFOLDER/
