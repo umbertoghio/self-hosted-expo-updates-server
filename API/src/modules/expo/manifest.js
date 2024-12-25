@@ -93,7 +93,7 @@ module.exports.hanldeManifestData = async (app, { query, headers }) => {
       formData: form.getBuffer().toString()
     }
   } catch (error) {
-    throw new Err.BadRequest(JSON.stringify('error'))
+    throw new Err.BadRequest(JSON.stringify(error))
   }
 }
 
