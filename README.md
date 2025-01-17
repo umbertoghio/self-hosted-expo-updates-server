@@ -113,7 +113,9 @@ Default throttle is no more than one dashboard update every 5 seconds.
 
 # Example Apps
 ## ExampleManaged
+
 You will find an example app in the Example Managed folder, to start tweaking it up you need:
+ 
 - Copy App public certificate from server to **/code-signing/certificate.pem**
 - Teweak app.json and app.config.js, specially the updates section to point to the right server
 - Create an Android or iOS build using the respective scripts in package.json
@@ -121,6 +123,13 @@ You will find an example app in the Example Managed folder, to start tweaking it
 - Make some changes in the app code in App.js
 - Publish an update with `scripts/expo-publish-selfhosted.sh staging ./ExampleManaged abc123def456 http://localhost:3000`
 - Test the update within the app
+
+## Production console log in Android
+
+You can see tailored console output using ADB logcat like this:
+
+- View only RN and Expo updates output `adb logcat "*:S" ReactNative:V ReactNativeJS:V FirebaseMessaging:V dev.expo.updates:V`
+- Clear logs `adb logcat -c`
 
 # Contribute
 Feel free to clone, costomize and send back PRs!
