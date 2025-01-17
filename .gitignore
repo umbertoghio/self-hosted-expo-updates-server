@@ -29,3 +29,6 @@ npm-debug.*
 #Builds
 /Builds/*
 !/Builds/.gitkeep
+
+# IDE - WebStorm
+.idea/*
