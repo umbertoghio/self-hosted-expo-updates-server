@@ -8,6 +8,9 @@
     "name": "Umberto Ghio",
     "email": "umberto@ghio.io"
   },
+  "scripts": {
+    "start": "npx nodemon --inspect --trace-warnings src/index.js"
+  },
   "directories": {
     "lib": "src",
     "config": "config/"

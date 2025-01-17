@@ -8,6 +8,8 @@ const wait = async (seconds) => new Promise(resolve => setTimeout(resolve, secon
 export default function App () {
   const [update, setUpdate] = useState('')
 
+  console.log(`[ExpoUpdates] ${update}`);
+
   const doUpdate = async () => {
     try {
       setUpdate('Checking for updates...')
@@ -37,6 +39,7 @@ export default function App () {
   useEffect(() => {
     setUpdate('Started')
   }, [])
+
   return (
     <View style={styles.container}>
       <StatusBar style='auto' />
@@ -54,7 +57,7 @@ export default function App () {
       <Text>This is the update number 11</Text>
 
       <Text>{update}</Text>
-      <Image source={require('./assets/img.png')} style={{ width: 100, height: 100 }} />
+      <Image source={require('./assets/images/img.png')} style={{ width: 100, height: 100 }} />
 
     </View>
   )

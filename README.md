@@ -1,10 +1,10 @@
 <h2 align="center">Self Hosted Expo Updates Server</h2>
 
 # Intro
-Self Hosted Expo Update Server is ... a ready to use, battery included, Expo-compatible server to manage updates that you can host yourself in the cloud and have full control and visibility on the update cycle, including rollbacks!
+Self Hosted Expo Update Server is a ready to use **_batteries included_** Expo updates compliant  server to manage updates that you can host yourself in the cloud and have full control and visibility on the update cycle, including rollbacks!
 
 I love the ability to push over-the-air updates with expo, it is a fantastic feature, but with great power comes great responsibility.
-The console-only interface can be tricky, the risk of making mistakes is high (especially on ejected app with incompatible binaries), if you want to roll back you really need to know what you are doing. And a single mistake can have potentially devastating impact.
+The console-only interface can be tricky, the risk of making mistakes is high (especially on ejected app with incompatible binaries), if you want to roll back you really need to know what you are doing, and a single mistake can have potentially devastating impact.
 
 I have already made a simple helper library that I use in my expo projects to simplify the update setup on the mobile side, check out [expo-custom-updater](https://github.com/umbertoghio/expo-custom-updater)
 
@@ -40,7 +40,7 @@ If you have Docker installed you clone this project you and play around by runni
 
 ## Deploy on your server
 If you use Docker you can find a production-ready docker-compose files under the Docker folder, just copy Docker/production on your server, set your secrets / credentials and you are ready to go. The two docker images are public and ready to go.
-Explanation for the Environment settings is in the docker-compose file
+Explanation for the Environment settings is in the docker-compose file. For production reverse proxy with Apache take a look at **README DOCKER.md**  
 
 Otherwise you can build from code, there's a NodeJS API server under the API folder and a React / Vite web project under the Web foder.
 
@@ -111,6 +111,16 @@ Default throttle is no more than one dashboard update every 5 seconds.
 
 ![image](https://user-images.githubusercontent.com/25666241/187808147-1c6fac7c-cc95-4fcf-a736-f059b00f83ef.png)
 
+# Example Apps
+## ExampleManaged
+You will find an example app in the Example Managed folder, to start tweaking it up you need:
+- Copy App public certificate from server to **/code-signing/certificate.pem**
+- Teweak app.json and app.config.js, specially the updates section to point to the right server
+- Create an Android or iOS build using the respective scripts in package.json
+- Install and test the app
+- Make some changes in the app code in App.js
+- Publish an update with `scripts/expo-publish-selfhosted.sh staging ./ExampleManaged abc123def456 http://localhost:3000`
+- Test the update within the app
 
 # Contribute
 Feel free to clone, costomize and send back PRs!
