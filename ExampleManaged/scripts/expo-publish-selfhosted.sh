@@ -25,7 +25,7 @@ fi
 
 # Checking Project Path
 if [ -z "$PROJECTPATH" ]; then
-      printf "Error: missing project folder directoryrelease channel parameter.\n"
+      printf "Error: missing project folder parameter.\n"
       showUsage
       exit 1
 fi
