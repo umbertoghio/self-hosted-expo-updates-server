@@ -25,7 +25,7 @@ fi
 
 # Checking Project Path
 if [ -z "$PROJECTPATH" ]; then
-      printf "Error: missing project folder directoryrelease channel parameter.\n"
+      printf "Error: missing project folder parameter.\n"
       showUsage
       exit 1
 fi
@@ -56,9 +56,11 @@ fi
 # Publish the update
 ###############################################################################
 
+node ./scripts/exportClientExpoConfig.js > /tmp/app.json.temp
+
 # Getting project slug for project name
-SLUG=$(grep -o '"slug": "[^"]*' app.json | grep -o '[^"]*$')
-RUNTIMEVERSION=$(grep -o '"runtimeVersion": "[^"]*' app.json | grep -o '[^"]*$')
+SLUG=$(grep -o '"slug": "[^"]*' /tmp/app.json.temp | grep -o '[^"]*$')
+RUNTIMEVERSION=$(grep -o '"runtimeVersion": "[^"]*' /tmp/app.json.temp | grep -o '[^"]*$')
 
 BUILDFOLDER=/tmp/$SLUG-$RUNTIMEVERSION-$RELEASECHANNEL
 PAYLOAD="\"$BUILDFOLDER.zip\""
@@ -72,7 +74,7 @@ mkdir $BUILDFOLDER
 yarn expo export --output-dir $BUILDFOLDER
 
 # Add app.json & package.json to the build for info & Metadata
-cp app.json $BUILDFOLDER/
+mv /tmp/app.json.temp $BUILDFOLDER/app.json
 cp package.json $BUILDFOLDER/
 
 # Compress update
