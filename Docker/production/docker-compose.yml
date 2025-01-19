@@ -4,6 +4,7 @@ services:
     image: ghcr.io/umbertoghio/self-hosted-expo-updates-server-api:latest
     container_name: self_hosted_expo_updates_server_api
     restart: always
+    platform: linux/amd64
     depends_on:
       - self_hosted_expo_updates_server_db
     volumes:
@@ -18,18 +19,19 @@ services:
       - ADMIN_PASSWORD=devserver # Password for the admin user
       - UPLOAD_KEY=abc123def456 # Key used in the expo publish custom script
       - NODE_ENV=production
-      - PUBLIC_URL=https://api.myserverpublic # Public URL for the server, better if it is a https URL
+      - PUBLIC_URL=https://api.myserverpublic # Public URL for the server, better if it is a https URL. http://localhost:3000 for testing
       - DASBHOARD_THROTTLE_MSEC=5000 # No more than one refresh every 5 seconds fror the dashboard
   self_hosted_expo_updates_server_web:
     image: ghcr.io/umbertoghio/self-hosted-expo-updates-server-web:latest
     container_name: self_hosted_expo_updates_server_web
     restart: always
+    platform: linux/amd64
     depends_on:
       - self_hosted_expo_updates_server_api
     ports:
       - 8080:8080 # Put this behind an https reverse proxy if you want to use it in production
     environment:
-      - API_BASE_URL=https://api.myserverpublic # URL of the API server
+      - API_BASE_URL=https://api.myserverpublic # URL of the API server. http://localhost:3000 for testing
 
   self_hosted_expo_updates_server_db:
     container_name: self_hosted_expo_updates_server_db
