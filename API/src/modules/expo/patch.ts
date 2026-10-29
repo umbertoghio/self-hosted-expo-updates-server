@@ -2,6 +2,7 @@ import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as path from 'path'
 
+import { updateFilePath, UPDATES_ROOT } from './files'
 import { getMetadataAsync, getMetadataSync } from './helpers'
 
 const PATCH_BENEFIT_RATIO = 0.75
@@ -24,24 +25,24 @@ const loadHdiff = () => {
 
 const sha256 = (buffer) => crypto.createHash('sha256').update(buffer).digest('hex')
 
-export const getLaunchAssetPath = (upload, platform) => {
-  const { metadataJson } = getMetadataSync(upload)
+export const getLaunchAssetPath = (upload, platform, updatesRoot = UPDATES_ROOT) => {
+  const { metadataJson } = getMetadataSync(upload, updatesRoot)
   const platformMeta = metadataJson?.fileMetadata?.[platform]
   if (!platformMeta?.bundle) {
     throw new Error(`No bundle for platform ${platform} in update ${upload.updateId}`)
   }
-  return path.join(upload.path, platformMeta.bundle)
+  return updateFilePath(upload.path, platformMeta.bundle)
 }
 
 // Async sibling for main-loop callers (integrity guard, asset hot path, admin
 // size walk). The sync version stays for the patch worker thread.
-export const getLaunchAssetPathAsync = async (upload, platform) => {
-  const { metadataJson } = await getMetadataAsync(upload)
+export const getLaunchAssetPathAsync = async (upload, platform, updatesRoot = UPDATES_ROOT) => {
+  const { metadataJson } = await getMetadataAsync(upload, updatesRoot)
   const platformMeta = metadataJson?.fileMetadata?.[platform]
   if (!platformMeta?.bundle) {
     throw new Error(`No bundle for platform ${platform} in update ${upload.updateId}`)
   }
-  return path.join(upload.path, platformMeta.bundle)
+  return updateFilePath(upload.path, platformMeta.bundle)
 }
 
 // Which platforms this upload ships a launch bundle for. Used by the manual
@@ -58,10 +59,10 @@ export const getAvailablePlatforms = (upload): string[] => {
   }
 }
 
-export const getPatchDir = (toUpload) => path.join(toUpload.path, PATCH_DIR_NAME)
+export const getPatchDir = (toUpload) => updateFilePath(toUpload.path, PATCH_DIR_NAME)
 
 export const getPatchFilePath = (toUpload, fromUpload, platform) =>
-  path.join(getPatchDir(toUpload), `from-${fromUpload.updateId}-${platform}.patch`)
+  updateFilePath(getPatchDir(toUpload), `from-${fromUpload.updateId}-${platform}.patch`)
 
 const ensurePatchDir = (toUpload) => {
   const dir = getPatchDir(toUpload)

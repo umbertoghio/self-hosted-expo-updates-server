@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
+import { normalizeUpdatePath, openUpdateFile, readUpdateFileAsync, updateFilePath, UPDATES_ROOT } from './files'
 import { getMetadataAsync, getUpdateHashAsync } from './helpers'
 import { getLaunchAssetPathAsync } from './patch'
 
@@ -29,7 +30,7 @@ const pathExists = (p) => canAccess(p, fs.constants.F_OK)
  *     for broken bundles)
  *   - the patches worker (refuses to generate patches between broken bundles)
  */
-export const checkSingleIntegrity = async (up) => {
+export const checkSingleIntegrity = async (up, updatesRoot = UPDATES_ROOT) => {
   const issues = []
   const err = (category, message) => issues.push({ severity: 'error', category, message })
   const warn = (category, message) => issues.push({ severity: 'warning', category, message })
@@ -38,47 +39,51 @@ export const checkSingleIntegrity = async (up) => {
   else if (!(await pathExists(up.filename))) err('zip', 'zip archive missing on disk')
   else if (!(await isReadable(up.filename))) err('zip', 'zip archive not readable (permission)')
 
-  const hasDir = !!up.path && (await pathExists(up.path))
+  let directory = null
+  try {
+    directory = path.join(updatesRoot, path.posix.relative(UPDATES_ROOT, normalizeUpdatePath(up.path)))
+  } catch (e) {
+    /* invalid paths are reported as missing directories */
+  }
+  const hasDir = !!directory && (await pathExists(directory))
   if (!up.path) err('dir', 'extracted path not recorded in DB')
   else if (!hasDir) err('dir', 'extracted directory missing on disk')
-  else if (!(await isReadable(up.path))) err('dir', 'extracted directory not readable (permission)')
+  else if (!(await isReadable(directory))) err('dir', 'extracted directory not readable (permission)')
 
   if (!up.updateId) warn('db', 'updateId missing in DB')
   if (!up.updateHash) warn('db', 'updateHash missing in DB')
 
-  if (hasDir && (await isReadable(up.path))) {
+  if (hasDir && (await isReadable(directory))) {
     let metadata = null
     try {
-      ;({ metadataJson: metadata } = await getMetadataAsync(up))
+      ;({ metadataJson: metadata } = await getMetadataAsync(up, updatesRoot))
     } catch (e) {
       err('metadata', `metadata.json: ${e.message}`)
     }
 
-    const appJsonPath = path.join(up.path, 'app.json')
-    if (!(await pathExists(appJsonPath))) err('app-json', 'app.json missing')
-    else if (!(await isReadable(appJsonPath))) err('app-json', 'app.json not readable')
-    else {
-      try {
-        JSON.parse(await fs.promises.readFile(appJsonPath, 'utf-8'))
-      } catch (e) {
-        err('app-json', `app.json invalid JSON: ${e.message}`)
-      }
+    try {
+      JSON.parse(
+        (await readUpdateFileAsync(updateFilePath(up.path, 'app.json'), updatesRoot, 8 * 1024 * 1024)).toString(
+          'utf-8',
+        ),
+      )
+    } catch (e) {
+      err('app-json', `app.json invalid or unavailable: ${e.message}`)
     }
 
-    const pkgPath = path.join(up.path, 'package.json')
-    if (!(await pathExists(pkgPath))) err('package-json', 'package.json missing')
-    else if (!(await isReadable(pkgPath))) err('package-json', 'package.json not readable')
-    else {
-      try {
-        JSON.parse(await fs.promises.readFile(pkgPath, 'utf-8'))
-      } catch (e) {
-        err('package-json', `package.json invalid JSON: ${e.message}`)
-      }
+    try {
+      JSON.parse(
+        (await readUpdateFileAsync(updateFilePath(up.path, 'package.json'), updatesRoot, 8 * 1024 * 1024)).toString(
+          'utf-8',
+        ),
+      )
+    } catch (e) {
+      err('package-json', `package.json invalid or unavailable: ${e.message}`)
     }
 
     if (metadata && up.updateHash) {
       try {
-        const computed = await getUpdateHashAsync(up.path)
+        const computed = await getUpdateHashAsync(up.path, updatesRoot)
         if (computed !== up.updateHash) {
           err('hash', `updateHash drift (db=${up.updateHash.slice(0, 12)}…, fs=${computed.slice(0, 12)}…)`)
         }
@@ -94,26 +99,31 @@ export const checkSingleIntegrity = async (up) => {
 
         let bundleFull = null
         try {
-          bundleFull = await getLaunchAssetPathAsync(up, platform)
+          bundleFull = await getLaunchAssetPathAsync(up, platform, updatesRoot)
         } catch (e) {
           err('bundle', `${platform} bundle: ${e.message}`)
         }
 
         if (bundleFull) {
-          if (!(await pathExists(bundleFull))) err('bundle', `${platform} bundle missing`)
-          else if (!(await isReadable(bundleFull))) err('bundle', `${platform} bundle not readable (permission)`)
-          else {
-            try {
-              const st = await fs.promises.stat(bundleFull)
-              if (st.size === 0) err('bundle', `${platform} bundle is empty (0 bytes)`)
-            } catch (e) {
-              /* unlikely */
-            }
+          try {
+            const file = openUpdateFile(bundleFull, updatesRoot)
+            fs.closeSync(file.fd)
+            if (file.stat.size === 0) err('bundle', `${platform} bundle is empty (0 bytes)`)
+          } catch (e) {
+            err('bundle', `${platform} bundle invalid or unavailable`)
           }
         }
 
         const assets = platMeta.assets || []
-        const present = await Promise.all(assets.map((asset) => pathExists(path.join(up.path, asset.path))))
+        const present = assets.map((asset) => {
+          try {
+            const file = openUpdateFile(updateFilePath(up.path, asset.path), updatesRoot)
+            fs.closeSync(file.fd)
+            return true
+          } catch (e) {
+            return false
+          }
+        })
         const missingAssetCount = present.filter((ok) => !ok).length
         if (missingAssetCount > 0) {
           err('asset', `${platform}: ${missingAssetCount} asset file(s) missing`)
@@ -134,8 +144,8 @@ export const checkSingleIntegrity = async (up) => {
  * bundle for the given platform broken? Used by asset/patch flows so we
  * don't fail on iOS issues when an Android client is asking.
  */
-export const isLaunchBundleHealthy = async (up, platform) => {
-  const { issues } = await checkSingleIntegrity(up)
+export const isLaunchBundleHealthy = async (up, platform, updatesRoot = UPDATES_ROOT) => {
+  const { issues } = await checkSingleIntegrity(up, updatesRoot)
   const blocking = issues.filter((i) => {
     if (i.severity !== 'error') return false
     // Categories that affect bundle serving regardless of platform:
