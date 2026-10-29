@@ -2,6 +2,7 @@ import * as Err from '@feathersjs/errors'
 import FormData from 'form-data'
 import { serializeDictionary } from 'structured-headers'
 
+import { UPDATES_ROOT } from './files'
 import { convertToDictionaryItemsRepresentation, getAssetMetadataSync, getMetadataSync, signRSASHA256 } from './helpers'
 import { getRequestParams } from './request'
 
@@ -21,7 +22,7 @@ const getSignature = async ({ headers, manifest, privateKey }) => {
   return { 'expo-signature': serializeDictionary(dictionary) }
 }
 
-export const hanldeManifestData = async (app, { query, headers }) => {
+export const hanldeManifestData = async (app, { query, headers }, updatesRoot = UPDATES_ROOT) => {
   const { project, platform, runtimeVersion, releaseChannel } = getRequestParams({ query, headers })
 
   const [update] = await app
@@ -33,7 +34,7 @@ export const hanldeManifestData = async (app, { query, headers }) => {
   if (!application) return { message: 'No application found' }
 
   try {
-    const { metadataJson, createdAt } = getMetadataSync(update)
+    const { metadataJson, createdAt } = getMetadataSync(update, updatesRoot)
 
     const platformSpecificMetadata = metadataJson.fileMetadata[platform]
     const manifest = {
@@ -41,23 +42,29 @@ export const hanldeManifestData = async (app, { query, headers }) => {
       createdAt,
       runtimeVersion,
       assets: platformSpecificMetadata.assets.map((asset) =>
-        getAssetMetadataSync({
+        getAssetMetadataSync(
+          {
+            update,
+            filePath: asset.path,
+            ext: asset.ext,
+            runtimeVersion,
+            platform,
+            isLaunchAsset: false,
+          },
+          updatesRoot,
+        ),
+      ),
+      launchAsset: getAssetMetadataSync(
+        {
           update,
-          filePath: asset.path,
-          ext: asset.ext,
+          filePath: platformSpecificMetadata.bundle,
+          isLaunchAsset: true,
           runtimeVersion,
           platform,
-          isLaunchAsset: false,
-        }),
+          ext: null,
+        },
+        updatesRoot,
       ),
-      launchAsset: getAssetMetadataSync({
-        update,
-        filePath: platformSpecificMetadata.bundle,
-        isLaunchAsset: true,
-        runtimeVersion,
-        platform,
-        ext: null,
-      }),
       metadata: {},
       extra: {
         expoClient: update.appJson,

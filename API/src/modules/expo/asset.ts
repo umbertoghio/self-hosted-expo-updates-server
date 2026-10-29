@@ -1,12 +1,20 @@
 import * as Err from '@feathersjs/errors'
 import * as fs from 'fs'
-import * as path from 'path'
 
 import { getBsdiffSettings } from '../../services/bsdiff-settings'
 import type { LoggerLike } from '../../types'
 import loggerDefault from '../logger'
+import {
+  normalizeUpdatePath,
+  openUpdateFile,
+  readUpdateFile,
+  updateFilePath,
+  UPDATES_ROOT,
+  type VerifiedUpdateFile,
+} from './files'
 import { isLaunchBundleHealthy } from './integrity'
-import { getLaunchAssetPathAsync } from './patch'
+import { getLaunchAssetPathAsync, getPatchFilePath } from './patch'
+import { findPublishedAsset, isPublishedUpload } from './published-asset'
 const logger: LoggerLike = loggerDefault
 
 const PATCH_TERMINAL_NOT_BENEFICIAL = 'not-beneficial'
@@ -25,7 +33,7 @@ const wantsBsdiffPatch = (headers) => {
 const buildFallback = (assetPath, contentType) => ({
   type: 'asset',
   path: assetPath,
-  contentType: decodeURI(contentType),
+  contentType,
 })
 
 /**
@@ -47,12 +55,12 @@ const buildFallback = (assetPath, contentType) => ({
  *   - 'failed' + still cooling   → fallback
  *   - no record                  → enqueue → fallback
  */
-const decidePatchAction = (existing, now) => {
+const decidePatchAction = (existing, now, fileExists: (filename: string) => boolean = fs.existsSync) => {
   if (!existing) {
     return { decision: 'queue-then-fallback' }
   }
   if (existing.status === PATCH_TERMINAL_READY) {
-    if (existing.path && fs.existsSync(existing.path)) {
+    if (existing.path && fileExists(existing.path)) {
       return { decision: 'serve-patch', patchDoc: existing }
     }
     return {
@@ -75,17 +83,17 @@ const decidePatchAction = (existing, now) => {
   return { decision: 'fallback' }
 }
 
-const isLaunchAssetPath = async (assetPath, upload, platform) => {
+const isLaunchAssetPath = async (assetPath, upload, platform, updatesRoot) => {
   try {
-    const expected = path.resolve(await getLaunchAssetPathAsync(upload, platform))
-    return path.resolve(assetPath) === expected
+    const expected = await getLaunchAssetPathAsync(upload, platform, updatesRoot)
+    return normalizeUpdatePath(assetPath) === expected
   } catch (e) {
     return false
   }
 }
 
-const tryHandlePatch = async (app, { query, headers }, fallback) => {
-  const { asset, project, platform, updateId, contentType } = query
+const tryHandlePatch = async (app, { query, headers }, fallback, authorizedUpload, updatesRoot) => {
+  const { asset, project, platform, updateId } = query
   if (!wantsBsdiffPatch(headers)) return fallback
   if (!project || !platform || !updateId) return fallback
   if (platform !== 'ios' && platform !== 'android') return fallback
@@ -118,6 +126,8 @@ const tryHandlePatch = async (app, { query, headers }, fallback) => {
     return fallback
   }
   if (!toUpload || !fromUpload) return fallback
+  if (!isPublishedUpload(toUpload) || !isPublishedUpload(fromUpload)) return fallback
+  if (toUpload.path !== authorizedUpload.path || toUpload.updateId !== authorizedUpload.updateId) return fallback
 
   // Cross-version safety
   if (toUpload.project !== project) return fallback
@@ -126,7 +136,7 @@ const tryHandlePatch = async (app, { query, headers }, fallback) => {
   if (toUpload.releaseChannel !== fromUpload.releaseChannel) return fallback
 
   // Verify the requested asset is actually the launch bundle of toUpload
-  if (!(await isLaunchAssetPath(asset, toUpload, platform))) return fallback
+  if (!(await isLaunchAssetPath(asset, toUpload, platform, updatesRoot))) return fallback
 
   // Integrity gate — never serve or queue patches based on broken bundles.
   // We check both ends because:
@@ -135,7 +145,7 @@ const tryHandlePatch = async (app, { query, headers }, fallback) => {
   //     a syntactically valid but semantically wrong patch.
   //   - if the TO bundle is broken, the patch would reconstruct corrupt
   //     output, which the client would reject (or worse, accept).
-  const fromHealth = await isLaunchBundleHealthy(fromUpload, platform)
+  const fromHealth = await isLaunchBundleHealthy(fromUpload, platform, updatesRoot)
   if (!fromHealth.healthy) {
     logger.warn('asset.patch: skipping — FROM bundle has integrity errors', {
       fromUpdateId: currentUpdateId,
@@ -143,7 +153,7 @@ const tryHandlePatch = async (app, { query, headers }, fallback) => {
     })
     return fallback
   }
-  const toHealth = await isLaunchBundleHealthy(toUpload, platform)
+  const toHealth = await isLaunchBundleHealthy(toUpload, platform, updatesRoot)
   if (!toHealth.healthy) {
     logger.warn('asset.patch: skipping — TO bundle has integrity errors', {
       toUpdateId: requestedUpdateId,
@@ -171,9 +181,21 @@ const tryHandlePatch = async (app, { query, headers }, fallback) => {
     return fallback
   }
 
-  const decision = decidePatchAction(existing, now)
+  const decision = decidePatchAction(existing, now, (filePath) => {
+    try {
+      const file = openUpdateFile(filePath, updatesRoot)
+      fs.closeSync(file.fd)
+      return true
+    } catch (e) {
+      return false
+    }
+  })
 
   if (decision.decision === 'serve-patch') {
+    // A DB path is not authority to read an arbitrary file. It must be the
+    // deterministic patch for this pair, and pass the same FD jail as assets.
+    if (normalizeUpdatePath(decision.patchDoc.path) !== getPatchFilePath(toUpload, fromUpload, platform))
+      return fallback
     // increment served count via raw $inc (Feathers patch doesn't support operators)
     if (patches.Model) {
       patches.Model.updateOne(
@@ -257,28 +279,33 @@ const tryHandlePatch = async (app, { query, headers }, fallback) => {
   return fallback
 }
 
-export const handleAssetData = async (app, { query, headers }) => {
+export const handleAssetData = async (app, { query, headers = {} }, updatesRoot = UPDATES_ROOT) => {
   const { asset, contentType } = query
   if (!asset || !contentType) {
     throw new Err.BadRequest('No asset or contentType provided.')
   }
 
-  if (asset.includes('app.json') || asset.includes('package.json') || !asset.startsWith('/updates/')) {
-    throw new Err.BadRequest('Invalid asset name.')
-  }
-
-  const assetPath = path.resolve(path.join(asset))
-  if (!fs.existsSync(assetPath)) {
-    throw new Err.BadRequest(`Asset "${asset}" does not exist.`)
-  }
-
-  const fallback = buildFallback(assetPath, contentType)
-
+  let authorized
   try {
-    return await tryHandlePatch(app, { query, headers }, fallback)
+    authorized = await findPublishedAsset(app, { query, headers }, updatesRoot)
+  } catch (e) {
+    throw new Err.BadRequest('Invalid or unpublished asset.')
+  }
+  const fallback = buildFallback(authorized.assetPath, authorized.contentType)
+  let result = fallback
+  try {
+    result = await tryHandlePatch(app, { query, headers }, fallback, authorized.upload, updatesRoot)
   } catch (e) {
     logger.error('asset.patch: unexpected error, falling back to full bundle', { error: e.message })
-    return fallback
+  }
+  try {
+    const file = openUpdateFile(result.path, updatesRoot)
+    fs.closeSync(file.fd)
+    // Feathers also exposes this service via socket.io. Never leave an open
+    // descriptor in service results; only the HTTP response owns a stream.
+    return result
+  } catch (e) {
+    throw new Err.BadRequest('Asset file is unavailable.')
   }
 }
 
@@ -289,32 +316,35 @@ export const handleAssetData = async (app, { query, headers }) => {
 // loop stays free and memory stays bounded.
 const streamAssetFile = (
   res,
-  filePath: string,
+  file: VerifiedUpdateFile,
   { status, contentType, headers }: { status?: number; contentType: string; headers?: Record<string, string> },
 ) => {
   // Phase A — before any byte is written we can still send a clean status.
-  let size: number
+  let stream: fs.ReadStream
   try {
-    size = fs.statSync(filePath).size
+    if (!file || !fs.fstatSync(file.fd).isFile()) throw new Error('Invalid asset descriptor')
+    // With fd supplied Node/Bun never opens this path again. Ownership of the
+    // already verified descriptor transfers to the stream, including aborts.
+    stream = fs.createReadStream(file.path, { fd: file.fd, autoClose: true })
+    if (status) res.status(status)
+    if (headers) {
+      for (const [key, value] of Object.entries(headers)) res.set(key, value)
+    }
+    res.type(contentType)
+    res.set('Content-Length', String(file.stat.size))
   } catch (e) {
-    logger.error('asset.stream: stat failed before send', { path: filePath, error: e.message })
+    if (stream) stream.destroy()
+    else if (file) fs.closeSync(file.fd)
+    logger.error('asset.stream: setup failed before send', { error: e.message })
     if (!res.headersSent) res.status(404).end()
     return
   }
 
-  if (status) res.status(status)
-  if (headers) {
-    for (const [key, value] of Object.entries(headers)) res.set(key, value)
-  }
-  res.type(contentType)
-  res.set('Content-Length', String(size))
-
-  const stream = fs.createReadStream(filePath)
   // Phase B — headers may already be flushed, so the status is locked in.
   // The only honest signal left is to destroy the connection; the Expo client
   // detects the truncated/aborted download (size/hash mismatch) and retries.
   stream.on('error', (e) => {
-    logger.error('asset.stream: read error mid-stream', { path: filePath, error: e.message })
+    logger.error('asset.stream: read error mid-stream', { path: file.path, error: e.message })
     if (!res.headersSent) {
       res.status(404).end()
     } else {
@@ -326,30 +356,35 @@ const streamAssetFile = (
   stream.pipe(res)
 }
 
-export const handleAssetResponse = (res) => {
+export const handleAssetResponse = (res, updatesRoot = UPDATES_ROOT) => {
+  let file: VerifiedUpdateFile
+  try {
+    // Revalidate and hold the actual response descriptor. The stream below
+    // uses this FD, so no path is reopened after the security check.
+    file = openUpdateFile(res.data.path, updatesRoot)
+  } catch (error) {
+    if (!res.headersSent) res.status(404).end()
+    else res.destroy()
+    return
+  }
   if (res.data.type === 'patch') {
-    streamAssetFile(res, res.data.path, {
+    streamAssetFile(res, file, {
       status: 226,
       contentType: 'application/octet-stream',
       headers: { IM: 'bsdiff', 'expo-base-update-id': res.data.baseUpdateId },
     })
     return
   }
-  streamAssetFile(res, res.data.path, { contentType: res.data.contentType })
+  streamAssetFile(res, file, { contentType: res.data.contentType })
 }
 
-export const getJSONInfo = ({ path: paramPath }) => {
+export const getJSONInfo = ({ path: paramPath }, updatesRoot = UPDATES_ROOT) => {
   if (!paramPath) throw new Err.BadRequest('Missing path parameter')
 
-  const appJsonPath = path.resolve(`${paramPath}/app.json`)
-  const pkgJsonPath = path.resolve(`${paramPath}/package.json`)
-  if (!fs.existsSync(appJsonPath)) throw new Err.GeneralError('Error: app.json not found')
-  if (!fs.existsSync(pkgJsonPath)) throw new Err.GeneralError('Error: package.json not found')
-
-  const appJsonBuffer = fs.readFileSync(path.resolve(appJsonPath), null)
+  const appJsonBuffer = readUpdateFile(updateFilePath(paramPath, 'app.json'), updatesRoot, 8 * 1024 * 1024)
   const appJson = JSON.parse(appJsonBuffer.toString('utf-8'))
 
-  const pkgJsonBuffer = fs.readFileSync(path.resolve(pkgJsonPath), null)
+  const pkgJsonBuffer = readUpdateFile(updateFilePath(paramPath, 'package.json'), updatesRoot, 8 * 1024 * 1024)
   const pkgJson = JSON.parse(pkgJsonBuffer.toString('utf-8'))
   return {
     appJson: appJson.expo,

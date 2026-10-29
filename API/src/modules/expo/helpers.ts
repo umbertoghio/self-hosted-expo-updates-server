@@ -4,6 +4,7 @@ import mimeModule from 'mime'
 import * as path from 'path'
 
 import type { AssetMetadataOptions, MetadataResult, UnknownRecord, UploadRecord } from '../../types'
+import { openUpdateFile, readUpdateFile, readUpdateFileAsync, updateFilePath, UPDATES_ROOT } from './files'
 
 const mime = mimeModule
 
@@ -50,32 +51,39 @@ export const getPrivateKeyAsync = async () => {
 const HASH_CACHE_MAX = Number(process.env.ASSET_HASH_CACHE_MAX) || 5000
 const hashCache = new Map<string, { hash: string; key: string }>()
 
-const getAssetHashesCached = (resolvedPath: string): { hash: string; key: string } => {
-  const stat = fs.statSync(resolvedPath)
-  const cacheKey = `${resolvedPath}:${stat.size}:${stat.mtimeMs}`
-  const hit = hashCache.get(cacheKey)
-  if (hit) {
-    // Refresh recency: re-insert moves the entry to the end of the Map.
-    hashCache.delete(cacheKey)
-    hashCache.set(cacheKey, hit)
-    return hit
+const getAssetHashesCached = (logicalPath: string, updatesRoot: string): { hash: string; key: string } => {
+  const file = openUpdateFile(logicalPath, updatesRoot)
+  try {
+    const stat = file.stat
+    const cacheKey = `${file.path}:${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeMs}`
+    const hit = hashCache.get(cacheKey)
+    if (hit) {
+      // Refresh recency: re-insert moves the entry to the end of the Map.
+      hashCache.delete(cacheKey)
+      hashCache.set(cacheKey, hit)
+      return hit
+    }
+    const asset = fs.readFileSync(file.fd)
+    const value = {
+      hash: getBase64URLEncoding(createHash(asset, 'sha256', 'base64')),
+      key: createHash(asset, 'md5', 'hex'),
+    }
+    hashCache.set(cacheKey, value)
+    if (hashCache.size > HASH_CACHE_MAX) {
+      hashCache.delete(hashCache.keys().next().value) // evict least-recently used
+    }
+    return value
+  } finally {
+    fs.closeSync(file.fd)
   }
-  const asset = fs.readFileSync(resolvedPath, null)
-  const value = {
-    hash: getBase64URLEncoding(createHash(asset, 'sha256', 'base64')),
-    key: createHash(asset, 'md5', 'hex'),
-  }
-  hashCache.set(cacheKey, value)
-  if (hashCache.size > HASH_CACHE_MAX) {
-    hashCache.delete(hashCache.keys().next().value) // evict least-recently used
-  }
-  return value
 }
 
-export const getAssetMetadataSync = ({ update, filePath, ext, isLaunchAsset, platform }: AssetMetadataOptions) => {
-  const normalizedFilePath = path.normalize(filePath).replace(/\\/g, '/')
-  const assetFilePath = path.join(update.path, normalizedFilePath)
-  const { hash: assetHash, key } = getAssetHashesCached(path.resolve(assetFilePath))
+export const getAssetMetadataSync = (
+  { update, filePath, ext, isLaunchAsset, platform }: AssetMetadataOptions,
+  updatesRoot = UPDATES_ROOT,
+) => {
+  const assetFilePath = updateFilePath(update.path, filePath)
+  const { hash: assetHash, key } = getAssetHashesCached(assetFilePath, updatesRoot)
   const keyExtensionSuffix = isLaunchAsset ? 'bundle' : ext
   const contentType = isLaunchAsset ? 'application/javascript' : mime.getType(ext)
 
@@ -109,10 +117,10 @@ const resolveManifestTimestamp = (update: UploadRecord): string => {
   return new Date().toISOString()
 }
 
-export const getMetadataSync = (update: UploadRecord): MetadataResult => {
+export const getMetadataSync = (update: UploadRecord, updatesRoot = UPDATES_ROOT): MetadataResult => {
   try {
-    const metadataPath = `${update.path}/metadata.json`
-    const updateMetadataBuffer = fs.readFileSync(path.resolve(metadataPath), null)
+    const metadataPath = updateFilePath(update.path, 'metadata.json')
+    const updateMetadataBuffer = readUpdateFile(metadataPath, updatesRoot, 8 * 1024 * 1024)
     const metadataJson = JSON.parse(updateMetadataBuffer.toString('utf-8'))
 
     return {
@@ -128,10 +136,10 @@ export const getMetadataSync = (update: UploadRecord): MetadataResult => {
 // that run on the main event loop, so the metadata.json read happens on the
 // libuv threadpool instead of blocking. getMetadataSync stays for the manifest
 // hot path and the patch worker thread.
-export const getMetadataAsync = async (update: UploadRecord): Promise<MetadataResult> => {
+export const getMetadataAsync = async (update: UploadRecord, updatesRoot = UPDATES_ROOT): Promise<MetadataResult> => {
   try {
-    const metadataPath = path.resolve(`${update.path}/metadata.json`)
-    const updateMetadataBuffer = await fs.promises.readFile(metadataPath)
+    const metadataPath = updateFilePath(update.path, 'metadata.json')
+    const updateMetadataBuffer = await readUpdateFileAsync(metadataPath, updatesRoot, 8 * 1024 * 1024)
     const metadataJson = JSON.parse(updateMetadataBuffer.toString('utf-8'))
     return {
       metadataJson,
@@ -148,17 +156,17 @@ const convertSHA256HashToUUID = (value) => {
 
 export { convertSHA256HashToUUID }
 
-const getUpdateHash = (pathToUpdate) => {
-  const metadataPath = `${pathToUpdate}/metadata.json`
-  const updateMetadataBuffer = fs.readFileSync(path.resolve(metadataPath), null)
+const getUpdateHash = (pathToUpdate, updatesRoot = UPDATES_ROOT) => {
+  const metadataPath = updateFilePath(pathToUpdate, 'metadata.json')
+  const updateMetadataBuffer = readUpdateFile(metadataPath, updatesRoot, 8 * 1024 * 1024)
   return createHash(updateMetadataBuffer, 'sha256', 'hex')
 }
 
 export { getUpdateHash }
 
-const getUpdateHashAsync = async (pathToUpdate) => {
-  const metadataPath = path.resolve(`${pathToUpdate}/metadata.json`)
-  const updateMetadataBuffer = await fs.promises.readFile(metadataPath)
+const getUpdateHashAsync = async (pathToUpdate, updatesRoot = UPDATES_ROOT) => {
+  const metadataPath = updateFilePath(pathToUpdate, 'metadata.json')
+  const updateMetadataBuffer = await readUpdateFileAsync(metadataPath, updatesRoot, 8 * 1024 * 1024)
   return createHash(updateMetadataBuffer, 'sha256', 'hex')
 }
 
