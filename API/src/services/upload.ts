@@ -9,6 +9,7 @@ import fsBlob from 'fs-blob-store'
 import multer from 'multer'
 import * as unzipper from 'unzipper'
 
+import s from '../hooks/security'
 import { getJSONInfo } from '../modules/expo/asset'
 import { getUpdateHash, getUpdateId } from '../modules/expo/helpers'
 import type { AppLike, HookContextLike, UnknownRecord, UploadRecord } from '../types'
@@ -132,14 +133,23 @@ const createDocument = async (context: UploadHookContext) => {
   return context
 }
 
-const prepareForUpload = async (context: UploadHookContext) => {
-  if (!context.params.headers['release-channel']) {
+const validateUploadHeaders = (app: AppLike, headers: Record<string, string | undefined> = {}) => {
+  if (!headers['release-channel']) {
     throw new Err.BadRequest('Upload failed: missing release-channel header')
   }
 
-  if (context.app.get('uploadKey') !== context.params.headers['upload-key']) {
+  const expected = app.get('uploadKey')
+  const provided = headers['upload-key']
+  if (
+    typeof expected !== 'string' || expected.length === 0 ||
+    typeof provided !== 'string' || provided.length === 0 || provided !== expected
+  ) {
     throw new Err.BadRequest('Upload failed: missing or wrong upload-key header')
   }
+}
+
+const prepareForUpload = async (context: UploadHookContext) => {
+  validateUploadHeaders(context.app, context.params.headers)
 
   // Handle multipart content
   if (!context.data.uri && context.params.file) {
@@ -156,12 +166,12 @@ const prepareForUpload = async (context: UploadHookContext) => {
 const getHooks = () => ({
   before: {
     all: [],
-    find: [],
-    get: [],
+    find: [s.externalMethodNotAllowed],
+    get: [s.externalMethodNotAllowed],
     create: [prepareForUpload],
-    update: [],
-    patch: [],
-    remove: [],
+    update: [s.externalMethodNotAllowed],
+    patch: [s.externalMethodNotAllowed],
+    remove: [s.externalMethodNotAllowed],
   },
   after: {
     all: [],
@@ -176,11 +186,26 @@ const getHooks = () => ({
 
 export default (app: AppLike & { use(path: string, ...handlers: unknown[]): void }) => {
   const blob = blobService({ Model: blobStorage })
+  // Reject unsupported methods and unauthorized POSTs before multer reads multipart bytes.
+  // Socket.IO still passes through the same validation in prepareForUpload.
+  const guardUploadRequest = (
+    req: { method?: string; headers?: Record<string, string | undefined> },
+    res: unknown,
+    next: (error?: unknown) => void,
+  ) => {
+    if (req.method !== 'POST') return next(new Err.MethodNotAllowed('Method is not allowed'))
+    try {
+      validateUploadHeaders(app, req.headers ?? {})
+      next()
+    } catch (error) {
+      next(error)
+    }
+  }
   const middleware = (req: { feathers: UnknownRecord; file?: unknown }, res: unknown, next: () => void) => {
     req.feathers.file = req.file
     next()
   }
 
-  app.use('/upload', multipartMiddleware.single('uri'), middleware, blob)
+  app.use('/upload', guardUploadRequest, multipartMiddleware.single('uri'), middleware, blob)
   app.service('upload').hooks(getHooks())
 }
